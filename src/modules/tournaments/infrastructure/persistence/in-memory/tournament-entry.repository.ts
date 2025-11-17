@@ -1,7 +1,7 @@
 import { InMemoryDatabase } from "../../../../../infrastructure/persistence/in-memory/database";
 import type { UUID } from "../../../../shared/types";
-import type { TournamentEntry } from "../../domain/tournament-entry";
-import type { TournamentEntryRepository } from "../../domain/tournament-entry.repository";
+import type { TournamentEntry } from "../../../domain/tournament-entry";
+import type { TournamentEntryRepository } from "../../../domain/tournament-entry.repository";
 
 export class InMemoryTournamentEntryRepository
   implements TournamentEntryRepository

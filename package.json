@@ -2,14 +2,15 @@
   "name": "tournaments",
   "version": "1.0.50",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest",
     "dev": "bun run --watch src/index.ts"
   },
   "dependencies": {
     "elysia": "latest"
   },
   "devDependencies": {
-    "bun-types": "latest"
+    "bun-types": "latest",
+    "vitest": "^4.0.10"
   },
   "module": "src/index.js"
 }

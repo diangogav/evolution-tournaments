@@ -1,0 +1,197 @@
+{
+  "client": "Thunder Client",
+  "collectionName": "Tournaments API",
+  "dateExported": "2025-11-17T00:00:00.000Z",
+  "version": "1.1",
+  "folders": [
+    {
+      "name": "Players & Teams",
+      "requests": [
+        "list-players",
+        "create-player",
+        "list-teams",
+        "create-team",
+        "add-team-member"
+      ]
+    },
+    {
+      "name": "Participants",
+      "requests": ["list-participants", "create-participant"]
+    },
+    {
+      "name": "Tournaments",
+      "requests": [
+        "list-tournaments",
+        "create-tournament",
+        "register-entry",
+        "list-entries"
+      ]
+    },
+    {
+      "name": "Groups & Matches",
+      "requests": ["create-group", "create-match", "list-matches"]
+    }
+  ],
+  "requests": [
+    {
+      "id": "list-players",
+      "name": "List Players",
+      "method": "GET",
+      "url": "http://localhost:3000/players"
+    },
+    {
+      "id": "create-player",
+      "name": "Create Player",
+      "method": "POST",
+      "url": "http://localhost:3000/players",
+      "body": {
+        "type": "json",
+        "raw": {
+          "displayName": "Seto Kaiba",
+          "nickname": "Kaiba",
+          "countryCode": "JP",
+          "contactEmail": "kaiba@kc.com"
+        }
+      }
+    },
+    {
+      "id": "list-teams",
+      "name": "List Teams",
+      "method": "GET",
+      "url": "http://localhost:3000/teams"
+    },
+    {
+      "id": "create-team",
+      "name": "Create Team",
+      "method": "POST",
+      "url": "http://localhost:3000/teams",
+      "body": {
+        "type": "json",
+        "raw": {
+          "displayName": "Battle City Crew",
+          "shortCode": "BCC",
+          "minMembers": 2,
+          "maxMembers": 5,
+          "countryCode": "JP"
+        }
+      }
+    },
+    {
+      "id": "add-team-member",
+      "name": "Add Team Member",
+      "method": "POST",
+      "url": "http://localhost:3000/teams/members",
+      "body": {
+        "type": "json",
+        "raw": {
+          "teamId": "<team-id>",
+          "playerId": "<player-id>",
+          "isCaptain": true
+        }
+      }
+    },
+    {
+      "id": "list-participants",
+      "name": "List Participants",
+      "method": "GET",
+      "url": "http://localhost:3000/participants"
+    },
+    {
+      "id": "create-participant",
+      "name": "Create Participant",
+      "method": "POST",
+      "url": "http://localhost:3000/participants",
+      "body": {
+        "type": "json",
+        "raw": {
+          "type": "player",
+          "referenceId": "<player-id>",
+          "displayName": "Seto Kaiba",
+          "countryCode": "JP"
+        }
+      }
+    },
+    {
+      "id": "list-tournaments",
+      "name": "List Tournaments",
+      "method": "GET",
+      "url": "http://localhost:3000/tournaments"
+    },
+    {
+      "id": "create-tournament",
+      "name": "Create Tournament",
+      "method": "POST",
+      "url": "http://localhost:3000/tournaments",
+      "body": {
+        "type": "json",
+        "raw": {
+          "name": "Battle City 2025",
+          "discipline": "Yu-Gi-Oh!",
+          "format": "single_elimination",
+          "status": "registration",
+          "allowMixedParticipants": false,
+          "participantType": "player",
+          "maxParticipants": 32
+        }
+      }
+    },
+    {
+      "id": "register-entry",
+      "name": "Register Tournament Entry",
+      "method": "POST",
+      "url": "http://localhost:3000/tournaments/entries",
+      "body": {
+        "type": "json",
+        "raw": {
+          "tournamentId": "<tournament-id>",
+          "participantId": "<participant-id>",
+          "seed": 1
+        }
+      }
+    },
+    {
+      "id": "list-entries",
+      "name": "List Tournament Entries",
+      "method": "GET",
+      "url": "http://localhost:3000/tournaments/<tournament-id>/entries"
+    },
+    {
+      "id": "create-group",
+      "name": "Create Group",
+      "method": "POST",
+      "url": "http://localhost:3000/groups",
+      "body": {
+        "type": "json",
+        "raw": {
+          "tournamentId": "<tournament-id>",
+          "name": "Group A",
+          "participants": ["<participant-id>", "<participant-id-2>"]
+        }
+      }
+    },
+    {
+      "id": "create-match",
+      "name": "Create Match",
+      "method": "POST",
+      "url": "http://localhost:3000/matches",
+      "body": {
+        "type": "json",
+        "raw": {
+          "tournamentId": "<tournament-id>",
+          "roundNumber": 1,
+          "participants": [
+            { "participantId": "<participant-id>", "score": 0 },
+            { "participantId": "<participant-id-2>", "score": 0 }
+          ]
+        }
+      }
+    },
+    {
+      "id": "list-matches",
+      "name": "List Matches",
+      "method": "GET",
+      "url": "http://localhost:3000/matches"
+    }
+  ]
+}
+

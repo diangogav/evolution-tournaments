@@ -1,7 +1,7 @@
 import { InMemoryDatabase } from "../../../../../infrastructure/persistence/in-memory/database";
 import type { UUID } from "../../../../shared/types";
-import type { Tournament } from "../../domain/tournament";
-import type { TournamentRepository } from "../../domain/tournament.repository";
+import type { Tournament } from "../../../domain/tournament";
+import type { TournamentRepository } from "../../../domain/tournament.repository";
 
 export class InMemoryTournamentRepository implements TournamentRepository {
   constructor(private readonly db: InMemoryDatabase) {}
