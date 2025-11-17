@@ -1,4 +1,4 @@
-import type { UUID } from "../domain/models";
+import type { UUID } from "./types";
 
 export interface IdGenerator {
   generate(): UUID;

@@ -1,28 +1,24 @@
 import { Elysia } from "elysia";
 import { registerRoutes } from "./infrastructure/http/routes";
 import { InMemoryDatabase } from "./infrastructure/persistence/in-memory/database";
-import {
-  InMemoryGroupRepository,
-  InMemoryMatchRepository,
-  InMemoryParticipantRepository,
-  InMemoryPlayerRepository,
-  InMemoryTeamMemberRepository,
-  InMemoryTeamRepository,
-  InMemoryTournamentEntryRepository,
-  InMemoryTournamentRepository,
-} from "./infrastructure/persistence/in-memory/repositories";
-import { RandomIdGenerator } from "./infrastructure/services/id-generator";
-import { SystemClock } from "./infrastructure/services/clock";
-import {
-  AddTeamMemberUseCase,
-  CreateGroupUseCase,
-  CreateMatchUseCase,
-  CreateParticipantUseCase,
-  CreatePlayerUseCase,
-  CreateTeamUseCase,
-  CreateTournamentUseCase,
-  RegisterTournamentEntryUseCase,
-} from "./application/use-cases";
+import { RandomIdGenerator } from "./modules/shared/infrastructure/services/id-generator";
+import { SystemClock } from "./modules/shared/infrastructure/services/clock";
+import { CreatePlayerUseCase } from "./modules/players/application/create-player.use-case";
+import { CreateTeamUseCase } from "./modules/teams/application/create-team.use-case";
+import { AddTeamMemberUseCase } from "./modules/teams/application/add-team-member.use-case";
+import { CreateParticipantUseCase } from "./modules/participants/application/create-participant.use-case";
+import { CreateTournamentUseCase } from "./modules/tournaments/application/create-tournament.use-case";
+import { RegisterTournamentEntryUseCase } from "./modules/tournaments/application/register-tournament-entry.use-case";
+import { CreateGroupUseCase } from "./modules/groups/application/create-group.use-case";
+import { CreateMatchUseCase } from "./modules/matches/application/create-match.use-case";
+import { InMemoryPlayerRepository } from "./modules/players/infrastructure/persistence/in-memory/player.repository";
+import { InMemoryTeamRepository } from "./modules/teams/infrastructure/persistence/in-memory/team.repository";
+import { InMemoryTeamMemberRepository } from "./modules/teams/infrastructure/persistence/in-memory/team-member.repository";
+import { InMemoryParticipantRepository } from "./modules/participants/infrastructure/persistence/in-memory/participant.repository";
+import { InMemoryTournamentRepository } from "./modules/tournaments/infrastructure/persistence/in-memory/tournament.repository";
+import { InMemoryTournamentEntryRepository } from "./modules/tournaments/infrastructure/persistence/in-memory/tournament-entry.repository";
+import { InMemoryGroupRepository } from "./modules/groups/infrastructure/persistence/in-memory/group.repository";
+import { InMemoryMatchRepository } from "./modules/matches/infrastructure/persistence/in-memory/match.repository";
 
 const db = new InMemoryDatabase();
 const idGenerator = new RandomIdGenerator();

@@ -10,26 +10,22 @@ import {
   CreateTournamentEntryBody,
   IdentifierSchema,
 } from "./schemas";
-import type {
-  CreateGroupUseCase,
-  CreateMatchUseCase,
-  CreateParticipantUseCase,
-  CreatePlayerUseCase,
-  CreateTeamUseCase,
-  CreateTournamentUseCase,
-  RegisterTournamentEntryUseCase,
-  AddTeamMemberUseCase,
-} from "../../application/use-cases";
-import type {
-  GroupRepository,
-  MatchRepository,
-  ParticipantRepository,
-  PlayerRepository,
-  TeamMemberRepository,
-  TeamRepository,
-  TournamentEntryRepository,
-  TournamentRepository,
-} from "../../domain/repositories";
+import type { CreateGroupUseCase } from "../../modules/groups/application/create-group.use-case";
+import type { GroupRepository } from "../../modules/groups/domain/group.repository";
+import type { CreateMatchUseCase } from "../../modules/matches/application/create-match.use-case";
+import type { MatchRepository } from "../../modules/matches/domain/match.repository";
+import type { CreateParticipantUseCase } from "../../modules/participants/application/create-participant.use-case";
+import type { ParticipantRepository } from "../../modules/participants/domain/participant.repository";
+import type { CreatePlayerUseCase } from "../../modules/players/application/create-player.use-case";
+import type { PlayerRepository } from "../../modules/players/domain/player.repository";
+import type { CreateTeamUseCase } from "../../modules/teams/application/create-team.use-case";
+import type { TeamRepository } from "../../modules/teams/domain/team.repository";
+import type { AddTeamMemberUseCase } from "../../modules/teams/application/add-team-member.use-case";
+import type { TeamMemberRepository } from "../../modules/teams/domain/team-member.repository";
+import type { CreateTournamentUseCase } from "../../modules/tournaments/application/create-tournament.use-case";
+import type { RegisterTournamentEntryUseCase } from "../../modules/tournaments/application/register-tournament-entry.use-case";
+import type { TournamentRepository } from "../../modules/tournaments/domain/tournament.repository";
+import type { TournamentEntryRepository } from "../../modules/tournaments/domain/tournament-entry.repository";
 
 export type HttpDependencies = {
   useCases: {
