@@ -4,7 +4,11 @@
   "scripts": {
     "test": "vitest",
     "dev": "bun run --watch src/index.ts",
-    "migrate:deploy": "npx prisma migrate deploy"
+    "migrate:deploy": "npx prisma migrate deploy",
+    "db:seed": "npx prisma db seed"
+  },
+  "prisma": {
+    "seed": "bun tsx prisma/seed.ts"
   },
   "dependencies": {
     "elysia": "latest",
@@ -12,6 +16,7 @@
   },
   "devDependencies": {
     "bun-types": "latest",
+    "tsx": "^4.20.6",
     "vitest": "^4.0.10"
   },
   "module": "src/index.js"
