@@ -9,14 +9,14 @@ datasource db {
 }
 
 model Player {
-  id                   String        @id @default(uuid())
+  id                   String       @id @default(uuid())
   displayName          String
   nickname             String?
   birthDate            String?
   countryCode          String?
-  contactEmail         String?       @unique
+  contactEmail         String?      @unique
   preferredDisciplines String[]
-  isActive             Boolean       @default(true)
+  isActive             Boolean      @default(true)
   metadata             Json?
   teamMembers          TeamMember[]
   participant          Participant?
@@ -25,7 +25,7 @@ model Player {
 }
 
 model Team {
-  id          String        @id @default(uuid())
+  id          String       @id @default(uuid())
   displayName String
   shortCode   String?
   logoUrl     String?
@@ -33,7 +33,7 @@ model Team {
   minMembers  Int
   maxMembers  Int
   countryCode String?
-  isActive    Boolean       @default(true)
+  isActive    Boolean      @default(true)
   metadata    Json?
   teamMembers TeamMember[]
   participant Participant?
@@ -56,21 +56,20 @@ model TeamMember {
 }
 
 model Participant {
-  id            String          @id @default(uuid())
-  type          ParticipantType
-  playerId      String?         @unique
-  player        Player?         @relation(fields: [playerId], references: [id])
-  teamId        String?         @unique
-  team          Team?           @relation(fields: [teamId], references: [id])
-  displayName   String
-  countryCode   String?
-  seeding       Int?
-  metadata      Json?
-  entries       TournamentEntry[]
+  id          String            @id @default(uuid())
+  type        ParticipantType
+  playerId    String?           @unique
+  player      Player?           @relation(fields: [playerId], references: [id])
+  teamId      String?           @unique
+  team        Team?             @relation(fields: [teamId], references: [id])
+  displayName String
+  countryCode String?
+  seeding     Int?
+  metadata    Json?
+  entries     TournamentEntry[]
 
   @@map("participants")
 }
-
 
 model Tournament {
   id                     String            @id @default(uuid())
@@ -93,7 +92,6 @@ model Tournament {
   @@map("tournaments")
 }
 
-
 model TournamentEntry {
   id            String                @id @default(uuid())
   tournamentId  String
@@ -109,7 +107,6 @@ model TournamentEntry {
   @@map("tournament_entries")
 }
 
-
 model Group {
   id           String            @id @default(uuid())
   tournamentId String
@@ -122,9 +119,9 @@ model Group {
 }
 
 model Match {
-  id           String           @id @default(uuid())
+  id           String            @id @default(uuid())
   tournamentId String
-  tournament   Tournament       @relation(fields: [tournamentId], references: [id])
+  tournament   Tournament        @relation(fields: [tournamentId], references: [id])
   roundNumber  Int
   stage        String?
   bestOf       Int?
@@ -156,7 +153,6 @@ enum TournamentStatus {
   COMPLETED
   CANCELLED
 }
-
 
 enum TournamentEntryStatus {
   PENDING

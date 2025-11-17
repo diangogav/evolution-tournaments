@@ -4,20 +4,20 @@ export interface Identified {
   id: UUID;
 }
 
-export type ParticipantType = "player" | "team";
+export type ParticipantType = "PLAYER" | "TEAM";
 
 export type TournamentFormat =
-  | "round_robin"
-  | "group_stage"
-  | "single_elimination"
-  | "double_elimination";
+  | "ROUND_ROBIN"
+  | "SWISS"
+  | "SINGLE_ELIMINATION"
+  | "DOUBLE_ELIMINATION";
 
 export type TournamentStatus =
-  | "draft"
-  | "registration"
-  | "in_progress"
-  | "completed"
-  | "archived";
+  | "DRAFT"
+  | "PUBLISHED"
+  | "STARTED"
+  | "COMPLETED"
+  | "CANCELLED";
 
 export type TournamentEntryStatus =
   | "pending"

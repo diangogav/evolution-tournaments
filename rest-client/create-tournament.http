@@ -1,0 +1,12 @@
+POST http://localhost:3000/tournaments HTTP/1.1
+content-type: application/json
+
+{
+  "name": "yugi's tournament",
+  "discipline": "Yu-Gi-Oh!",
+  "format": "SINGLE_ELIMINATION",
+  "status": "PUBLISHED",
+  "allowMixedParticipants": false,
+  "participantType": "PLAYER",
+  "maxParticipants": 8
+}

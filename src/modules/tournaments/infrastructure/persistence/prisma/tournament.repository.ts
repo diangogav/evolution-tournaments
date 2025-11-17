@@ -21,7 +21,7 @@ export class PrismaTournamentRepository implements TournamentRepository {
         startAt: tournament.startAt,
         endAt: tournament.endAt,
         location: tournament.location,
-        metadata: tournament.metadata,
+        // metadata: tournament.metadata,
       },
     });
 

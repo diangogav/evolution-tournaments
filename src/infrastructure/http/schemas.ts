@@ -3,23 +3,23 @@ import { t } from "elysia";
 export const IdentifierSchema = t.String({ minLength: 1 });
 
 export const ParticipantTypeSchema = t.Union([
-  t.Literal("player"),
-  t.Literal("team"),
+  t.Literal("PLAYER"),
+  t.Literal("TEAM"),
 ]);
 
 export const TournamentFormatSchema = t.Union([
-  t.Literal("round_robin"),
-  t.Literal("group_stage"),
-  t.Literal("single_elimination"),
-  t.Literal("double_elimination"),
+  t.Literal("ROUND_ROBIN"),
+  t.Literal("SWISS"),
+  t.Literal("SINGLE_ELIMINATION"),
+  t.Literal("DOUBLE_ELIMINATION"),
 ]);
 
 export const TournamentStatusSchema = t.Union([
-  t.Literal("draft"),
-  t.Literal("registration"),
-  t.Literal("in_progress"),
-  t.Literal("completed"),
-  t.Literal("archived"),
+  t.Literal("DRAFT"),
+  t.Literal("PUBLISHED"),
+  t.Literal("STARTED"),
+  t.Literal("COMPLETED"),
+  t.Literal("CANCELLED"),
 ]);
 
 export const TournamentEntryStatusSchema = t.Union([
