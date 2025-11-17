@@ -19,45 +19,34 @@ import { InMemoryTournamentRepository } from "./modules/tournaments/infrastructu
 import { InMemoryTournamentEntryRepository } from "./modules/tournaments/infrastructure/persistence/in-memory/tournament-entry.repository";
 import { InMemoryGroupRepository } from "./modules/groups/infrastructure/persistence/in-memory/group.repository";
 import { InMemoryMatchRepository } from "./modules/matches/infrastructure/persistence/in-memory/match.repository";
-import { AppDataSource } from "./infrastructure/persistence/typeorm/data-source";
-import { TypeOrmPlayerRepository } from "./modules/players/infrastructure/persistence/typeorm/player.repository";
-import { TypeOrmTeamRepository } from "./modules/teams/infrastructure/persistence/typeorm/team.repository";
-import { TypeOrmTeamMemberRepository } from "./modules/teams/infrastructure/persistence/typeorm/team-member.repository";
-import { TypeOrmParticipantRepository } from "./modules/participants/infrastructure/persistence/typeorm/participant.repository";
-import { TypeOrmTournamentRepository } from "./modules/tournaments/infrastructure/persistence/typeorm/tournament.repository";
-import { TypeOrmTournamentEntryRepository } from "./modules/tournaments/infrastructure/persistence/typeorm/tournament-entry.repository";
-import { TypeOrmGroupRepository } from "./modules/groups/infrastructure/persistence/typeorm/group.repository";
-import { TypeOrmMatchRepository } from "./modules/matches/infrastructure/persistence/typeorm/match.repository";
-import { PlayerEntity } from "./infrastructure/persistence/typeorm/entities/player.entity";
-import { TeamEntity } from "./infrastructure/persistence/typeorm/entities/team.entity";
-import { TeamMemberEntity } from "./infrastructure/persistence/typeorm/entities/team-member.entity";
-import { ParticipantEntity } from "./infrastructure/persistence/typeorm/entities/participant.entity";
-import { TournamentEntity } from "./infrastructure/persistence/typeorm/entities/tournament.entity";
-import { TournamentEntryEntity } from "./infrastructure/persistence/typeorm/entities/tournament-entry.entity";
-import { GroupEntity } from "./infrastructure/persistence/typeorm/entities/group.entity";
-import { MatchEntity } from "./infrastructure/persistence/typeorm/entities/match.entity";
+import { PrismaClient } from "./generated/prisma";
+import { PrismaPlayerRepository } from "./modules/players/infrastructure/persistence/prisma/player.repository";
+import { PrismaTeamRepository } from "./modules/teams/infrastructure/persistence/prisma/team.repository";
+import { PrismaTeamMemberRepository } from "./modules/teams/infrastructure/persistence/prisma/team-member.repository";
+import { PrismaParticipantRepository } from "./modules/participants/infrastructure/persistence/prisma/participant.repository";
+import { PrismaTournamentRepository } from "./modules/tournaments/infrastructure/persistence/prisma/tournament.repository";
+import { PrismaTournamentEntryRepository } from "./modules/tournaments/infrastructure/persistence/prisma/tournament-entry.repository";
+import { PrismaGroupRepository } from "./modules/groups/infrastructure/persistence/prisma/group.repository";
+import { PrismaMatchRepository } from "./modules/matches/infrastructure/persistence/prisma/match.repository";
 
 export const buildApp = async () => {
-  const useTypeOrm = process.env.USE_TYPEORM === "true";
+  const usePrisma = process.env.USE_PRISMA === "true";
   const idGenerator = new RandomIdGenerator();
   const clock = new SystemClock();
 
   let repositories;
 
-  if (useTypeOrm) {
-    if (!AppDataSource.isInitialized) {
-      await AppDataSource.initialize();
-    }
-
+  if (usePrisma) {
+    const prisma = new PrismaClient();
     repositories = {
-      players: new TypeOrmPlayerRepository(AppDataSource.getRepository(PlayerEntity)),
-      teams: new TypeOrmTeamRepository(AppDataSource.getRepository(TeamEntity)),
-      teamMembers: new TypeOrmTeamMemberRepository(AppDataSource.getRepository(TeamMemberEntity)),
-      participants: new TypeOrmParticipantRepository(AppDataSource.getRepository(ParticipantEntity)),
-      tournaments: new TypeOrmTournamentRepository(AppDataSource.getRepository(TournamentEntity)),
-      entries: new TypeOrmTournamentEntryRepository(AppDataSource.getRepository(TournamentEntryEntity)),
-      groups: new TypeOrmGroupRepository(AppDataSource.getRepository(GroupEntity)),
-      matches: new TypeOrmMatchRepository(AppDataSource.getRepository(MatchEntity)),
+      players: new PrismaPlayerRepository(prisma),
+      teams: new PrismaTeamRepository(prisma),
+      teamMembers: new PrismaTeamMemberRepository(prisma),
+      participants: new PrismaParticipantRepository(prisma),
+      tournaments: new PrismaTournamentRepository(prisma),
+      entries: new PrismaTournamentEntryRepository(prisma),
+      groups: new PrismaGroupRepository(prisma),
+      matches: new PrismaMatchRepository(prisma),
     } as const;
   } else {
     const db = new InMemoryDatabase();
@@ -123,4 +112,3 @@ export const buildApp = async () => {
 
   return { app, repositories, useCases };
 };
-

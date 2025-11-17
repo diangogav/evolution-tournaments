@@ -1,0 +1,162 @@
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Player {
+  id                   String        @id @default(uuid())
+  displayName          String
+  nickname             String?
+  birthDate            String?
+  countryCode          String?
+  contactEmail         String?       @unique
+  preferredDisciplines String[]
+  isActive             Boolean       @default(true)
+  metadata             Json?
+  teamMembers          TeamMember[]
+  participant          Participant?
+
+  @@map("players")
+}
+
+model Team {
+  id          String        @id @default(uuid())
+  displayName String
+  shortCode   String?
+  logoUrl     String?
+  managerName String?
+  minMembers  Int
+  maxMembers  Int
+  countryCode String?
+  isActive    Boolean       @default(true)
+  metadata    Json?
+  teamMembers TeamMember[]
+  participant Participant?
+
+  @@map("teams")
+}
+
+model TeamMember {
+  id        String  @id @default(uuid())
+  teamId    String
+  team      Team    @relation(fields: [teamId], references: [id])
+  playerId  String  @unique
+  player    Player  @relation(fields: [playerId], references: [id])
+  role      String?
+  isCaptain Boolean @default(false)
+  joinedAt  String
+  leftAt    String?
+
+  @@map("team_members")
+}
+
+model Participant {
+  id            String          @id @default(uuid())
+  type          ParticipantType
+  playerId      String?         @unique
+  player        Player?         @relation(fields: [playerId], references: [id])
+  teamId        String?         @unique
+  team          Team?           @relation(fields: [teamId], references: [id])
+  displayName   String
+  countryCode   String?
+  seeding       Int?
+  metadata      Json?
+  entries       TournamentEntry[]
+
+  @@map("participants")
+}
+
+model Tournament {
+  id                     String            @id @default(uuid())
+  name                   String
+  description            String?
+  discipline             String
+  format                 TournamentFormat
+  status                 TournamentStatus
+  allowMixedParticipants Boolean           @default(false)
+  participantType        ParticipantType?
+  maxParticipants        Int?
+  startAt                String?
+  endAt                  String?
+  location               String?
+  metadata               Json?
+  entries                TournamentEntry[]
+  groups                 Group[]
+  matches                Match[]
+
+  @@map("tournaments")
+}
+
+model TournamentEntry {
+  id            String                @id @default(uuid())
+  tournamentId  String
+  tournament    Tournament            @relation(fields: [tournamentId], references: [id])
+  participantId String
+  participant   Participant           @relation(fields: [participantId], references: [id])
+  status        TournamentEntryStatus
+  groupId       String?
+  group         Group?                @relation(fields: [groupId], references: [id])
+  seed          Int?
+  metadata      Json?
+
+  @@map("tournament_entries")
+}
+
+model Group {
+  id           String            @id @default(uuid())
+  tournamentId String
+  tournament   Tournament        @relation(fields: [tournamentId], references: [id])
+  name         String
+  participants TournamentEntry[]
+  metadata     Json?
+
+  @@map("groups")
+}
+
+model Match {
+  id           String           @id @default(uuid())
+  tournamentId String
+  tournament   Tournament       @relation(fields: [tournamentId], references: [id])
+  roundNumber  Int
+  stage        String?
+  bestOf       Int?
+  scheduledAt  String?
+  completedAt  String?
+  format       TournamentFormat?
+  participants Json // MatchParticipant is a complex type, using Json for now
+  metadata     Json?
+
+  @@map("matches")
+}
+
+enum ParticipantType {
+  PLAYER
+  TEAM
+}
+
+enum TournamentFormat {
+  SINGLE_ELIMINATION
+  DOUBLE_ELIMINATION
+  ROUND_ROBIN
+  SWISS
+}
+
+enum TournamentStatus {
+  DRAFT
+  PUBLISHED
+  STARTED
+  COMPLETED
+  CANCELLED
+}
+
+enum TournamentEntryStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
