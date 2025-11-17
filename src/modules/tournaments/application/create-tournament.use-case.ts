@@ -13,7 +13,7 @@ export class CreateTournamentUseCase {
     private readonly ids: IdGenerator
   ) {}
 
-  execute(input: {
+  async execute(input: {
     name: string;
     description?: string;
     discipline: string;
@@ -26,7 +26,7 @@ export class CreateTournamentUseCase {
     endAt?: string;
     location?: string;
     metadata?: Record<string, unknown>;
-  }): Tournament {
+  }): Promise<Tournament> {
     const allowMixed = input.allowMixedParticipants ?? false;
     if (!allowMixed && !input.participantType) {
       throw new Error(
