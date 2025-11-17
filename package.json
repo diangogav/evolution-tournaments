@@ -3,7 +3,8 @@
   "version": "1.0.50",
   "scripts": {
     "test": "vitest",
-    "dev": "bun run --watch src/index.ts"
+    "dev": "bun run --watch src/index.ts",
+    "migrate:deploy": "npx prisma migrate deploy"
   },
   "dependencies": {
     "elysia": "latest",

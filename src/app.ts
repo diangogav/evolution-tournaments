@@ -35,7 +35,6 @@ export const buildApp = async () => {
   const clock = new SystemClock();
 
   let repositories;
-
   if (usePrisma) {
     const prisma = new PrismaClient();
     repositories = {

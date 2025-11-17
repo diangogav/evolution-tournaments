@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
@@ -72,6 +71,7 @@ model Participant {
   @@map("participants")
 }
 
+
 model Tournament {
   id                     String            @id @default(uuid())
   name                   String
@@ -93,6 +93,7 @@ model Tournament {
   @@map("tournaments")
 }
 
+
 model TournamentEntry {
   id            String                @id @default(uuid())
   tournamentId  String
@@ -107,6 +108,7 @@ model TournamentEntry {
 
   @@map("tournament_entries")
 }
+
 
 model Group {
   id           String            @id @default(uuid())
@@ -154,6 +156,7 @@ enum TournamentStatus {
   COMPLETED
   CANCELLED
 }
+
 
 enum TournamentEntryStatus {
   PENDING
