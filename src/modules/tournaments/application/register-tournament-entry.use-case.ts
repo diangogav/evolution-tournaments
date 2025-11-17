@@ -13,20 +13,20 @@ export class RegisterTournamentEntryUseCase {
     private readonly ids: IdGenerator
   ) {}
 
-  execute(input: {
+  async execute(input: {
     tournamentId: UUID;
     participantId: UUID;
     status?: TournamentEntryStatus;
     groupId?: UUID;
     seed?: number;
     metadata?: Record<string, unknown>;
-  }): TournamentEntry {
-    const tournament = this.tournaments.findById(input.tournamentId);
+  }): Promise<TournamentEntry> {
+    const tournament = await this.tournaments.findById(input.tournamentId);
     if (!tournament) {
       throw new Error("Tournament not found");
     }
 
-    const participant = this.participants.findById(input.participantId);
+    const participant = await this.participants.findById(input.participantId);
     if (!participant) {
       throw new Error("Participant not found");
     }

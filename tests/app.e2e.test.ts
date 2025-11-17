@@ -12,8 +12,8 @@ const request = (path: string, init?: RequestInit) => {
 const jsonBody = (data: unknown) => JSON.stringify(data);
 
 describe("Tournaments API", () => {
-  it("creates a player and lists it", async () => {
-    const { app } = buildApp();
+  it.only("creates a player and lists it", async () => {
+    const { app } = await buildApp();
 
     const createResponse = await app.handle(
       request("/players", {
@@ -35,8 +35,8 @@ describe("Tournaments API", () => {
     expect(players).toHaveLength(1);
   });
 
-  it("runs a basic tournament registration flow", async () => {
-    const { app } = buildApp();
+  it.only("runs a basic tournament registration flow", async () => {
+    const { app } = await buildApp();
 
     const playerRes = await app.handle(
       request("/players", {

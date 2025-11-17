@@ -8,16 +8,16 @@ export class InMemoryParticipantRepository
 {
   constructor(private readonly db: InMemoryDatabase) {}
 
-  create(participant: Participant): Participant {
+  async create(participant: Participant): Promise<Participant> {
     this.db.collections.participants.set(participant.id, participant);
     return participant;
   }
 
-  list(): Participant[] {
+  async list(): Promise<Participant[]> {
     return Array.from(this.db.collections.participants.values());
   }
 
-  findById(id: UUID): Participant | undefined {
+  async findById(id: UUID): Promise<Participant | undefined> {
     return this.db.collections.participants.get(id);
   }
 }

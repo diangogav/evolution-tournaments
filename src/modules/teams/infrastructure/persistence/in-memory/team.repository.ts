@@ -6,16 +6,16 @@ import type { TeamRepository } from "../../domain/team.repository";
 export class InMemoryTeamRepository implements TeamRepository {
   constructor(private readonly db: InMemoryDatabase) {}
 
-  create(team: Team): Team {
+  async create(team: Team): Promise<Team> {
     this.db.collections.teams.set(team.id, team);
     return team;
   }
 
-  list(): Team[] {
+  async list(): Promise<Team[]> {
     return Array.from(this.db.collections.teams.values());
   }
 
-  findById(id: UUID): Team | undefined {
+  async findById(id: UUID): Promise<Team | undefined> {
     return this.db.collections.teams.get(id);
   }
 }

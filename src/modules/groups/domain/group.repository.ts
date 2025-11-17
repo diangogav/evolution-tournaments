@@ -1,7 +1,7 @@
 import type { Group } from "./group";
 
 export interface GroupRepository {
-  create(group: Group): Group;
-  list(): Group[];
+  create(group: Group): Promise<Group>;
+  list(): Promise<Group[]>;
 }
 

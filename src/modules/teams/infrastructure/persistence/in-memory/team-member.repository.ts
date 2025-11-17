@@ -6,12 +6,12 @@ import type { TeamMemberRepository } from "../../domain/team-member.repository";
 export class InMemoryTeamMemberRepository implements TeamMemberRepository {
   constructor(private readonly db: InMemoryDatabase) {}
 
-  create(member: TeamMember): TeamMember {
+  async create(member: TeamMember): Promise<TeamMember> {
     this.db.collections.teamMembers.set(member.id, member);
     return member;
   }
 
-  listByTeam(teamId: UUID): TeamMember[] {
+  async listByTeam(teamId: UUID): Promise<TeamMember[]> {
     return Array.from(this.db.collections.teamMembers.values()).filter(
       (member) => member.teamId === teamId
     );

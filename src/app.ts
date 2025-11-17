@@ -19,22 +19,59 @@ import { InMemoryTournamentRepository } from "./modules/tournaments/infrastructu
 import { InMemoryTournamentEntryRepository } from "./modules/tournaments/infrastructure/persistence/in-memory/tournament-entry.repository";
 import { InMemoryGroupRepository } from "./modules/groups/infrastructure/persistence/in-memory/group.repository";
 import { InMemoryMatchRepository } from "./modules/matches/infrastructure/persistence/in-memory/match.repository";
+import { AppDataSource } from "./infrastructure/persistence/typeorm/data-source";
+import { TypeOrmPlayerRepository } from "./modules/players/infrastructure/persistence/typeorm/player.repository";
+import { TypeOrmTeamRepository } from "./modules/teams/infrastructure/persistence/typeorm/team.repository";
+import { TypeOrmTeamMemberRepository } from "./modules/teams/infrastructure/persistence/typeorm/team-member.repository";
+import { TypeOrmParticipantRepository } from "./modules/participants/infrastructure/persistence/typeorm/participant.repository";
+import { TypeOrmTournamentRepository } from "./modules/tournaments/infrastructure/persistence/typeorm/tournament.repository";
+import { TypeOrmTournamentEntryRepository } from "./modules/tournaments/infrastructure/persistence/typeorm/tournament-entry.repository";
+import { TypeOrmGroupRepository } from "./modules/groups/infrastructure/persistence/typeorm/group.repository";
+import { TypeOrmMatchRepository } from "./modules/matches/infrastructure/persistence/typeorm/match.repository";
+import { PlayerEntity } from "./infrastructure/persistence/typeorm/entities/player.entity";
+import { TeamEntity } from "./infrastructure/persistence/typeorm/entities/team.entity";
+import { TeamMemberEntity } from "./infrastructure/persistence/typeorm/entities/team-member.entity";
+import { ParticipantEntity } from "./infrastructure/persistence/typeorm/entities/participant.entity";
+import { TournamentEntity } from "./infrastructure/persistence/typeorm/entities/tournament.entity";
+import { TournamentEntryEntity } from "./infrastructure/persistence/typeorm/entities/tournament-entry.entity";
+import { GroupEntity } from "./infrastructure/persistence/typeorm/entities/group.entity";
+import { MatchEntity } from "./infrastructure/persistence/typeorm/entities/match.entity";
 
-export const buildApp = () => {
-  const db = new InMemoryDatabase();
+export const buildApp = async () => {
+  const useTypeOrm = process.env.USE_TYPEORM === "true";
   const idGenerator = new RandomIdGenerator();
   const clock = new SystemClock();
 
-  const repositories = {
-    players: new InMemoryPlayerRepository(db),
-    teams: new InMemoryTeamRepository(db),
-    teamMembers: new InMemoryTeamMemberRepository(db),
-    participants: new InMemoryParticipantRepository(db),
-    tournaments: new InMemoryTournamentRepository(db),
-    entries: new InMemoryTournamentEntryRepository(db),
-    groups: new InMemoryGroupRepository(db),
-    matches: new InMemoryMatchRepository(db),
-  } as const;
+  let repositories;
+
+  if (useTypeOrm) {
+    if (!AppDataSource.isInitialized) {
+      await AppDataSource.initialize();
+    }
+
+    repositories = {
+      players: new TypeOrmPlayerRepository(AppDataSource.getRepository(PlayerEntity)),
+      teams: new TypeOrmTeamRepository(AppDataSource.getRepository(TeamEntity)),
+      teamMembers: new TypeOrmTeamMemberRepository(AppDataSource.getRepository(TeamMemberEntity)),
+      participants: new TypeOrmParticipantRepository(AppDataSource.getRepository(ParticipantEntity)),
+      tournaments: new TypeOrmTournamentRepository(AppDataSource.getRepository(TournamentEntity)),
+      entries: new TypeOrmTournamentEntryRepository(AppDataSource.getRepository(TournamentEntryEntity)),
+      groups: new TypeOrmGroupRepository(AppDataSource.getRepository(GroupEntity)),
+      matches: new TypeOrmMatchRepository(AppDataSource.getRepository(MatchEntity)),
+    } as const;
+  } else {
+    const db = new InMemoryDatabase();
+    repositories = {
+      players: new InMemoryPlayerRepository(db),
+      teams: new InMemoryTeamRepository(db),
+      teamMembers: new InMemoryTeamMemberRepository(db),
+      participants: new InMemoryParticipantRepository(db),
+      tournaments: new InMemoryTournamentRepository(db),
+      entries: new InMemoryTournamentEntryRepository(db),
+      groups: new InMemoryGroupRepository(db),
+      matches: new InMemoryMatchRepository(db),
+    } as const;
+  }
 
   const useCases = {
     createPlayer: new CreatePlayerUseCase(repositories.players, idGenerator),

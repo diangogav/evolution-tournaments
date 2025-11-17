@@ -13,7 +13,7 @@ const jsonBody = (data: unknown) => JSON.stringify(data);
 
 describe("Players API", () => {
   it("creates a player with all fields", async () => {
-    const { app } = buildApp();
+    const { app } = await buildApp();
 
     const createResponse = await app.handle(
       request("/players", {
@@ -45,7 +45,7 @@ describe("Players API", () => {
   });
 
   it("creates a player with only required fields", async () => {
-    const { app } = buildApp();
+    const { app } = await buildApp();
 
     const createResponse = await app.handle(
       request("/players", {
@@ -64,7 +64,7 @@ describe("Players API", () => {
   });
 
   it("lists all players", async () => {
-    const { app } = buildApp();
+    const { app } = await buildApp();
 
     // Create multiple players
     await app.handle(
@@ -111,7 +111,7 @@ describe("Players API", () => {
   });
 
   it("creates inactive player when isActive is false", async () => {
-    const { app } = buildApp();
+    const { app } = await buildApp();
 
     const createResponse = await app.handle(
       request("/players", {
@@ -129,7 +129,7 @@ describe("Players API", () => {
   });
 
   it("creates players with different country codes", async () => {
-    const { app } = buildApp();
+    const { app } = await buildApp();
 
     const player1Response = await app.handle(
       request("/players", {
@@ -175,7 +175,7 @@ describe("Players API", () => {
   });
 
   it("creates players with custom metadata", async () => {
-    const { app } = buildApp();
+    const { app } = await buildApp();
 
     const createResponse = await app.handle(
       request("/players", {
@@ -201,7 +201,7 @@ describe("Players API", () => {
   });
 
   it("handles preferred disciplines as array", async () => {
-    const { app } = buildApp();
+    const { app } = await buildApp();
 
     const createResponse = await app.handle(
       request("/players", {
@@ -223,7 +223,7 @@ describe("Players API", () => {
   });
 
   it("lists empty array when no players exist", async () => {
-    const { app } = buildApp();
+    const { app } = await buildApp();
 
     const listResponse = await app.handle(request("/players"));
     expect(listResponse.status).toBe(200);

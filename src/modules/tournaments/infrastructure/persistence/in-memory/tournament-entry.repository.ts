@@ -8,12 +8,12 @@ export class InMemoryTournamentEntryRepository
 {
   constructor(private readonly db: InMemoryDatabase) {}
 
-  create(entry: TournamentEntry): TournamentEntry {
+  async create(entry: TournamentEntry): Promise<TournamentEntry> {
     this.db.collections.entries.set(entry.id, entry);
     return entry;
   }
 
-  listByTournament(tournamentId: UUID): TournamentEntry[] {
+  async listByTournament(tournamentId: UUID): Promise<TournamentEntry[]> {
     return Array.from(this.db.collections.entries.values()).filter(
       (entry) => entry.tournamentId === tournamentId
     );

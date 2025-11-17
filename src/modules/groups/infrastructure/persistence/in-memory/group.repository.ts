@@ -5,12 +5,12 @@ import type { GroupRepository } from "../../domain/group.repository";
 export class InMemoryGroupRepository implements GroupRepository {
   constructor(private readonly db: InMemoryDatabase) {}
 
-  create(group: Group): Group {
+  async create(group: Group): Promise<Group> {
     this.db.collections.groups.set(group.id, group);
     return group;
   }
 
-  list(): Group[] {
+  async list(): Promise<Group[]> {
     return Array.from(this.db.collections.groups.values());
   }
 }

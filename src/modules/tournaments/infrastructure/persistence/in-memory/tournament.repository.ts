@@ -6,16 +6,16 @@ import type { TournamentRepository } from "../../../domain/tournament.repository
 export class InMemoryTournamentRepository implements TournamentRepository {
   constructor(private readonly db: InMemoryDatabase) {}
 
-  create(tournament: Tournament): Tournament {
+  async create(tournament: Tournament): Promise<Tournament> {
     this.db.collections.tournaments.set(tournament.id, tournament);
     return tournament;
   }
 
-  list(): Tournament[] {
+  async list(): Promise<Tournament[]> {
     return Array.from(this.db.collections.tournaments.values());
   }
 
-  findById(id: UUID): Tournament | undefined {
+  async findById(id: UUID): Promise<Tournament | undefined> {
     return this.db.collections.tournaments.get(id);
   }
 }
