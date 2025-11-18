@@ -17,6 +17,6 @@ export interface Tournament extends Identified {
   startAt?: string;
   endAt?: string;
   location?: string;
-  metadata?: Record<string, unknown>;
+  metadata?: {};
 }
 
