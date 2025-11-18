@@ -111,7 +111,12 @@ export const buildApp = async () => {
       repositories.participants,
       idGenerator
     ),
-    recordMatchResult: new RecordMatchResultUseCase(repositories.matches),
+    recordMatchResult: new RecordMatchResultUseCase(
+      repositories.matches,
+      repositories.tournaments,
+      repositories.participants,
+      idGenerator
+    ),
   } as const;
 
 // ...

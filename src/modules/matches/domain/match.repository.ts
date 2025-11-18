@@ -6,5 +6,6 @@ export interface MatchRepository {
   list(): Promise<Match[]>;
   findById(id: UUID): Promise<Match | undefined>;
   update(match: Match): Promise<Match>;
+  listByTournament(tournamentId: UUID): Promise<Match[]>;
 }
 

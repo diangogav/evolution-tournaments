@@ -50,10 +50,12 @@ export class GenerateSingleEliminationBracketUseCase {
       throw new Error("Number of participants must be a power of two");
     }
 
+    const bracketParticipants = this.sortParticipantsForBracket(participants);
+
     const round1Matches = [];
-    for (let i = 0; i < participants.length / 2; i++) {
-      const participant1 = participants[i];
-      const participant2 = participants[participants.length - 1 - i];
+    for (let i = 0; i < bracketParticipants.length / 2; i++) {
+      const participant1 = bracketParticipants[i * 2];
+      const participant2 = bracketParticipants[i * 2 + 1];
 
       const match = await this.createMatch.execute({
         tournamentId: tournament.id,
@@ -62,6 +64,9 @@ export class GenerateSingleEliminationBracketUseCase {
           { participantId: participant1.participantId },
           { participantId: participant2.participantId },
         ],
+        metadata: {
+          position: i + 1,
+        },
       });
       round1Matches.push(match);
     }
@@ -69,4 +74,29 @@ export class GenerateSingleEliminationBracketUseCase {
     // In a real scenario, we would save the matches
     console.log("Generated matches:", round1Matches);
   }
+
+  private sortParticipantsForBracket<T extends { seed?: number }>(
+    participants: T[]
+  ): T[] {
+    const n = participants.length;
+    let seeds = [1];
+    for (let i = 1; i < Math.log2(n); i++) {
+      const nextSeeds = [];
+      for (const seed of seeds) {
+        nextSeeds.push(seed);
+        nextSeeds.push(2 ** i + 1 - seed);
+      }
+      seeds = nextSeeds;
+    }
+
+    const bracketOrder: T[] = [];
+    for (const seed of seeds) {
+      bracketOrder.push(participants[seed - 1]);
+      bracketOrder.push(participants[n - seed]);
+    }
+
+    return bracketOrder;
+  }
 }
+
+

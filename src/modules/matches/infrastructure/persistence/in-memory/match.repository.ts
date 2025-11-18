@@ -23,5 +23,11 @@ export class InMemoryMatchRepository implements MatchRepository {
     this.db.collections.matches.set(match.id, match);
     return match;
   }
+
+  async listByTournament(tournamentId: UUID): Promise<Match[]> {
+    return Array.from(this.db.collections.matches.values()).filter(
+      (match) => match.tournamentId === tournamentId
+    );
+  }
 }
 

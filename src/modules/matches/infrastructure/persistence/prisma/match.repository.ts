@@ -66,4 +66,15 @@ export class PrismaMatchRepository implements MatchRepository {
       participants: updatedMatch.participants as [MatchParticipant, MatchParticipant],
     };
   }
+
+  async listByTournament(tournamentId: UUID): Promise<Match[]> {
+    const matches = await this.prisma.match.findMany({
+      where: { tournamentId },
+    });
+
+    return matches.map((m) => ({
+      ...m,
+      participants: m.participants as [MatchParticipant, MatchParticipant],
+    }));
+  }
 }
