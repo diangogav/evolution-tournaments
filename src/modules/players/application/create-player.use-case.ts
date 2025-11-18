@@ -8,7 +8,7 @@ export class CreatePlayerUseCase {
     private readonly ids: IdGenerator
   ) {}
 
-  execute(input: {
+  async execute(input: {
     displayName: string;
     nickname?: string;
     birthDate?: string;
@@ -17,7 +17,7 @@ export class CreatePlayerUseCase {
     preferredDisciplines?: string[];
     isActive?: boolean;
     metadata?: Record<string, unknown>;
-  }): Player {
+  }): Promise<Player> {
     const player: Player = {
       id: this.ids.generate(),
       displayName: input.displayName,

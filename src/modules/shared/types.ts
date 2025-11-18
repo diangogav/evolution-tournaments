@@ -20,10 +20,9 @@ export type TournamentStatus =
   | "CANCELLED";
 
 export type TournamentEntryStatus =
-  | "pending"
-  | "confirmed"
-  | "eliminated"
-  | "dropped";
+  | "PENDING"
+  | "CONFIRMED"
+  | "CANCELLED"
 
 export type MatchResult = "win" | "loss" | "draw";
 

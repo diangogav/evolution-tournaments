@@ -15,7 +15,7 @@ export class PrismaTournamentEntryRepository implements TournamentEntryRepositor
         status: entry.status,
         groupId: entry.groupId,
         seed: entry.seed,
-        metadata: entry.metadata,
+        // metadata: entry.metadata,
       },
     });
 

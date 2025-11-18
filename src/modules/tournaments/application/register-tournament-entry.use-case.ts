@@ -42,7 +42,7 @@ export class RegisterTournamentEntryUseCase {
       id: this.ids.generate(),
       tournamentId: tournament.id,
       participantId: participant.id,
-      status: input.status ?? "pending",
+      status: input.status ?? "PENDING",
       groupId: input.groupId,
       seed: input.seed,
       metadata: input.metadata,

@@ -23,10 +23,9 @@ export const TournamentStatusSchema = t.Union([
 ]);
 
 export const TournamentEntryStatusSchema = t.Union([
-  t.Literal("pending"),
-  t.Literal("confirmed"),
-  t.Literal("eliminated"),
-  t.Literal("dropped"),
+  t.Literal("PENDING"),
+  t.Literal("CONFIRMED"),
+  t.Literal("CANCELLED"),
 ]);
 
 export const MatchResultSchema = t.Union([

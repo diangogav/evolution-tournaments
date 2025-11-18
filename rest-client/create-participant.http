@@ -1,0 +1,82 @@
+POST http://localhost:3000/participants HTTP/1.1
+content-type: application/json
+
+{
+  "type": "PLAYER",
+  "referenceId": "d10a5ec1-6479-4226-bc16-1d546665f481",
+  "displayName": "Yugi Muto"
+}
+
+
+POST http://localhost:3000/participants HTTP/1.1
+content-type: application/json
+
+{
+  "type": "PLAYER",
+  "referenceId": "f6f5bc7b-5fdc-4cc3-aeaa-527d494cfc71",
+  "displayName": "Joey Wheeler"
+}
+
+POST http://localhost:3000/participants HTTP/1.1
+content-type: application/json
+
+{
+  "type": "PLAYER",
+  "referenceId": "a84f12f5-d159-43cc-8411-ccd3f6f54797",
+  "displayName": "Seto Kaiba"
+}
+
+POST http://localhost:3000/participants HTTP/1.1
+content-type: application/json
+
+{
+  "type": "PLAYER",
+  "referenceId": "85b6e511-a2bd-4804-a003-ffe02ea64d66",
+  "displayName": "Mai Valentine"
+}
+
+POST http://localhost:3000/participants HTTP/1.1
+content-type: application/json
+
+{
+  "type": "PLAYER",
+  "referenceId": "6542e7d4-2a6a-4563-8ece-e5c4c60e7f21",
+  "displayName": "Tea Gardner"
+}
+
+POST http://localhost:3000/participants HTTP/1.1
+content-type: application/json
+
+{
+  "type": "PLAYER",
+  "referenceId": "c573e903-3b3e-44aa-81b6-7955c3f52879",
+  "displayName": "Yami Yugi"
+}
+
+POST http://localhost:3000/participants HTTP/1.1
+content-type: application/json
+
+{
+  "type": "PLAYER",
+  "referenceId": "8585b140-a260-4883-9124-c49e4b872c69",
+  "displayName": "Yami Bakura"
+}
+
+POST http://localhost:3000/participants HTTP/1.1
+content-type: application/json
+
+{
+  "type": "PLAYER",
+  "referenceId": "14dbb6aa-b3c0-4eff-99f6-c74163e0c2c2",
+  "displayName": "Yami Ishtar"
+}
+
+
+POST http://localhost:3000/participants HTTP/1.1
+content-type: application/json
+
+{
+  "type": "PLAYER",
+  "referenceId": "87b3ae08-4b5f-449d-a941-357050f05601",
+  "displayName": "Rex Raptor"
+}
