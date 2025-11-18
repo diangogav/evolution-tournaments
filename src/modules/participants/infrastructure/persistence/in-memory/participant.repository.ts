@@ -1,7 +1,7 @@
 import { InMemoryDatabase } from "../../../../../infrastructure/persistence/in-memory/database";
 import type { UUID } from "../../../../shared/types";
-import type { Participant } from "../../domain/participant";
-import type { ParticipantRepository } from "../../domain/participant.repository";
+import type { Participant } from "../../../domain/participant";
+import type { ParticipantRepository } from "../../../domain/participant.repository";
 
 export class InMemoryParticipantRepository
   implements ParticipantRepository
@@ -17,8 +17,8 @@ export class InMemoryParticipantRepository
     return Array.from(this.db.collections.participants.values());
   }
 
-  async findById(id: UUID): Promise<Participant | undefined> {
-    return this.db.collections.participants.get(id);
+  async findById(id: UUID): Promise<Participant | null> {
+    return this.db.collections.participants.get(id) ?? null;
   }
 }
 

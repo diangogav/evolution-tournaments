@@ -8,8 +8,8 @@ export interface Participant extends Identified {
   type: ParticipantType;
   referenceId: UUID;
   displayName: string;
-  countryCode?: string;
-  seeding?: number;
-  metadata?: Record<string, unknown>;
+  countryCode?: string | null;
+  seeding?: number | null;
+  metadata?: {};
 }
 

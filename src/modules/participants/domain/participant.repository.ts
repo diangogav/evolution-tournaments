@@ -4,6 +4,6 @@ import type { Participant } from "./participant";
 export interface ParticipantRepository {
   create(participant: Participant): Promise<Participant>;
   list(): Promise<Participant[]>;
-  findById(id: UUID): Promise<Participant | undefined>;
+  findById(id: UUID): Promise<Participant | null>;
 }
 

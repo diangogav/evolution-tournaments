@@ -28,13 +28,13 @@ export class PrismaParticipantRepository implements ParticipantRepository {
     return participants.map(this.mapToDomain);
   }
 
-  async findById(id: UUID): Promise<Participant | undefined> {
+  async findById(id: UUID): Promise<Participant | null> {
     const participant = await this.prisma.participant.findUnique({
       where: { id },
     });
 
     if (!participant) {
-      return undefined;
+      return null;
     }
 
     return this.mapToDomain(participant);
@@ -47,7 +47,7 @@ export class PrismaParticipantRepository implements ParticipantRepository {
       displayName: participant.displayName,
       countryCode: participant.countryCode,
       seeding: participant.seeding,
-      metadata: participant.metadata,
+      metadata: participant.metadata as ({} | undefined),
       referenceId: participant.playerId || participant.teamId || '',
     };
   }

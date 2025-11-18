@@ -13,19 +13,19 @@ export class CreateParticipantUseCase {
     private readonly ids: IdGenerator
   ) {}
 
-  execute(input: {
+  async execute(input: {
     type: ParticipantType;
     referenceId: UUID;
     displayName: string;
     countryCode?: string;
     seeding?: number;
     metadata?: Record<string, unknown>;
-  }): Participant {
-    if (input.type === "player" && !this.players.findById(input.referenceId)) {
+  }): Promise<Participant> {
+    if (input.type === "PLAYER" && !this.players.findById(input.referenceId)) {
       throw new Error("Player reference not found");
     }
 
-    if (input.type === "team" && !this.teams.findById(input.referenceId)) {
+    if (input.type === "TEAM" && !this.teams.findById(input.referenceId)) {
       throw new Error("Team reference not found");
     }
 
