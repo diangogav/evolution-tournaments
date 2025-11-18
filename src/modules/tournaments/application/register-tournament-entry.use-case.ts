@@ -18,7 +18,6 @@ export class RegisterTournamentEntryUseCase {
     participantId: UUID;
     status?: TournamentEntryStatus;
     groupId?: UUID;
-    seed?: number;
     metadata?: Record<string, unknown>;
   }): Promise<TournamentEntry> {
     const tournament = await this.tournaments.findById(input.tournamentId);
@@ -38,13 +37,22 @@ export class RegisterTournamentEntryUseCase {
       throw new Error("Participant type not allowed in tournament");
     }
 
+    const existingEntries = await this.entries.listByTournament(
+      input.tournamentId
+    );
+    const maxSeed = existingEntries.reduce(
+      (max, entry) => (entry.seed && entry.seed > max ? entry.seed : max),
+      0
+    );
+    const nextSeed = maxSeed + 1;
+
     const entry: TournamentEntry = {
       id: this.ids.generate(),
       tournamentId: tournament.id,
       participantId: participant.id,
       status: input.status ?? "PENDING",
       groupId: input.groupId,
-      seed: input.seed,
+      seed: nextSeed,
       metadata: input.metadata,
     };
 

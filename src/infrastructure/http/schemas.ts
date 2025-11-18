@@ -93,7 +93,6 @@ export const CreateTournamentEntryBody = t.Object({
   participantId: IdentifierSchema,
   status: t.Optional(TournamentEntryStatusSchema),
   groupId: t.Optional(IdentifierSchema),
-  seed: t.Optional(t.Number({ minimum: 1 })),
   metadata: t.Optional(t.Record(t.String(), t.Unknown())),
 });
 
