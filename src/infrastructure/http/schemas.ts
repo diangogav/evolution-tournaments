@@ -117,10 +117,16 @@ export const CreateMatchBody = t.Object({
   stage: t.Optional(t.String()),
   bestOf: t.Optional(t.Number({ minimum: 1 })),
   scheduledAt: t.Optional(t.String({ format: "date-time" })),
-  participants: t.Array(CreateMatchParticipantBody, {
-    minItems: 2,
-    maxItems: 2,
-  }),
   metadata: t.Optional(t.Record(t.String(), t.Unknown())),
+});
+
+export const RecordMatchResultBody = t.Object({
+  participants: t.Array(
+    t.Object({
+      participantId: IdentifierSchema,
+      score: t.Number({ minimum: 0 }),
+    }),
+    { minItems: 2, maxItems: 2 }
+  ),
 });
 

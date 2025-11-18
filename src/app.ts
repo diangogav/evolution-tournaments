@@ -11,6 +11,7 @@ import { CreateTournamentUseCase } from "./modules/tournaments/application/creat
 import { RegisterTournamentEntryUseCase } from "./modules/tournaments/application/register-tournament-entry.use-case";
 import { CreateGroupUseCase } from "./modules/groups/application/create-group.use-case";
 import { CreateMatchUseCase } from "./modules/matches/application/create-match.use-case";
+import { RecordMatchResultUseCase } from "./modules/matches/application/record-match-result.use-case";
 import { GenerateSingleEliminationBracketUseCase } from "./modules/tournaments/application/generate-single-elimination-bracket.use-case";
 import { InMemoryPlayerRepository } from "./modules/players/infrastructure/persistence/in-memory/player.repository";
 import { InMemoryTeamRepository } from "./modules/teams/infrastructure/persistence/in-memory/team.repository";
@@ -100,6 +101,9 @@ export const buildApp = async () => {
       repositories.participants,
       idGenerator
     ),
+
+// ...
+
     generateSingleEliminationBracket: new GenerateSingleEliminationBracketUseCase(
       repositories.tournaments,
       repositories.entries,
@@ -107,7 +111,10 @@ export const buildApp = async () => {
       repositories.participants,
       idGenerator
     ),
+    recordMatchResult: new RecordMatchResultUseCase(repositories.matches),
   } as const;
+
+// ...
 
   const app = registerRoutes(new Elysia(), { useCases, repositories }).onError(
     ({ error, set }) => {

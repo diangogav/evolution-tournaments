@@ -9,6 +9,7 @@ import {
   CreateTournamentBody,
   CreateTournamentEntryBody,
   IdentifierSchema,
+  RecordMatchResultBody,
 } from "./schemas";
 import type { CreateGroupUseCase } from "../../modules/groups/application/create-group.use-case";
 import type { GroupRepository } from "../../modules/groups/domain/group.repository";
@@ -27,6 +28,7 @@ import type { RegisterTournamentEntryUseCase } from "../../modules/tournaments/a
 import { GenerateSingleEliminationBracketUseCase } from "../../modules/tournaments/application/generate-single-elimination-bracket.use-case";
 import type { TournamentRepository } from "../../modules/tournaments/domain/tournament.repository";
 import type { TournamentEntryRepository } from "../../modules/tournaments/domain/tournament-entry.repository";
+import { RecordMatchResultUseCase } from "../../modules/matches/application/record-match-result.use-case";
 
 export type HttpDependencies = {
   useCases: {
@@ -39,6 +41,7 @@ export type HttpDependencies = {
     createGroup: CreateGroupUseCase;
     createMatch: CreateMatchUseCase;
     generateSingleEliminationBracket: GenerateSingleEliminationBracketUseCase;
+    recordMatchResult: RecordMatchResultUseCase;
   };
   repositories: {
     players: PlayerRepository;
@@ -194,6 +197,21 @@ export const registerRoutes = (
             return match;
           },
           { body: CreateMatchBody }
+        )
+        .post(
+          "/:id/result",
+          async ({ params, body, set }) => {
+            await useCases.recordMatchResult.execute({
+              matchId: params.id,
+              participants: body.participants as any,
+            });
+            set.status = 200;
+            return { message: "Match result recorded successfully" };
+          },
+          {
+            params: t.Object({ id: IdentifierSchema }),
+            body: RecordMatchResultBody,
+          }
         )
     );
 };

@@ -1,0 +1,11 @@
+POST http://localhost:3000/matches/b74a9e62-7821-4180-a88c-b113f2ff3a3a/result HTTP/1.1
+content-type: application/json
+
+{
+  "participants":[
+    {
+      "participantId": ,
+      "score": 2
+    }
+  ]
+}
