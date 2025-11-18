@@ -4,8 +4,12 @@ content-type: application/json
 {
   "participants":[
     {
-      "participantId": ,
+      "participantId": "9c8b5451-1448-4b00-a8e8-afa657125a2d",
       "score": 2
+    },
+    {
+      "participantId": "26d5fe86-4e82-4ef0-8bcf-b96c101e4e8f",
+      "score": 1
     }
   ]
 }
