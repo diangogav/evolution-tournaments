@@ -4,7 +4,7 @@ import type { Match } from "./match";
 export interface MatchRepository {
   create(match: Match): Promise<Match>;
   list(): Promise<Match[]>;
-  findById(id: UUID): Promise<Match | undefined>;
+  findById(id: UUID): Promise<Match | null>;
   update(match: Match): Promise<Match>;
   listByTournament(tournamentId: UUID): Promise<Match[]>;
 }

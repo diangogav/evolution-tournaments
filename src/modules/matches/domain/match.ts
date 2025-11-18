@@ -14,6 +14,6 @@ export interface Match extends Identified {
   completedAt: string | null;
   format: TournamentFormat | null;
   participants: MatchParticipant[];
-  // metadata?: Record<string, unknown>;
+  metadata?: {};
 }
 

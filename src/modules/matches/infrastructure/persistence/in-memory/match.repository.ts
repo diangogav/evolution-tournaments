@@ -1,7 +1,7 @@
 import { InMemoryDatabase } from "../../../../../infrastructure/persistence/in-memory/database";
 import type { UUID } from "../../../../shared/types";
-import type { Match } from "../../domain/match";
-import type { MatchRepository } from "../../domain/match.repository";
+import type { Match } from "../../../domain/match";
+import type { MatchRepository } from "../../../domain/match.repository";
 
 export class InMemoryMatchRepository implements MatchRepository {
   constructor(private readonly db: InMemoryDatabase) {}
@@ -15,8 +15,8 @@ export class InMemoryMatchRepository implements MatchRepository {
     return Array.from(this.db.collections.matches.values());
   }
 
-  async findById(id: UUID): Promise<Match | undefined> {
-    return this.db.collections.matches.get(id);
+  async findById(id: UUID): Promise<Match | null> {
+    return this.db.collections.matches.get(id) ?? null;
   }
 
   async update(match: Match): Promise<Match> {
