@@ -4,6 +4,6 @@ import type { Player } from "./player";
 export interface PlayerRepository {
   create(player: Player): Promise<Player>;
   list(): Promise<Player[]>;
-  findById(id: UUID): Promise<Player | undefined>;
+  findById(id: UUID): Promise<Player | null>;
 }
 

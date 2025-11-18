@@ -8,6 +8,6 @@ export interface Player extends Identified {
   contactEmail?: string;
   preferredDisciplines?: string[];
   isActive: boolean;
-  metadata?: Record<string, unknown>;
+  metadata?: {};
 }
 

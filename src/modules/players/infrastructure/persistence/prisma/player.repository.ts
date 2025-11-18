@@ -29,13 +29,13 @@ export class PrismaPlayerRepository implements PlayerRepository {
     return players as Player[];
   }
 
-  async findById(id: UUID): Promise<Player | undefined> {
+  async findById(id: UUID): Promise<Player | null> {
     const player = await this.prisma.player.findUnique({
       where: { id },
     });
 
     if (!player) {
-      return undefined;
+      return null;
     }
 
     return player as Player;

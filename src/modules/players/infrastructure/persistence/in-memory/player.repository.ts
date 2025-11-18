@@ -1,7 +1,7 @@
 import { InMemoryDatabase } from "../../../../../infrastructure/persistence/in-memory/database";
 import type { UUID } from "../../../../shared/types";
-import type { Player } from "../../domain/player";
-import type { PlayerRepository } from "../../domain/player.repository";
+import { Player } from "../../../domain/player";
+import type { PlayerRepository } from "../../../domain/player.repository";
 
 export class InMemoryPlayerRepository implements PlayerRepository {
   constructor(private readonly db: InMemoryDatabase) {}
@@ -15,8 +15,8 @@ export class InMemoryPlayerRepository implements PlayerRepository {
     return Array.from(this.db.collections.players.values());
   }
 
-  async findById(id: UUID): Promise<Player | undefined> {
-    return this.db.collections.players.get(id);
+  async findById(id: UUID): Promise<Player | null> {
+    return this.db.collections.players.get(id) ?? null;
   }
 }
 
