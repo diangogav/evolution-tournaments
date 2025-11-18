@@ -13,7 +13,7 @@ export class CreateMatchUseCase {
     private readonly ids: IdGenerator
   ) {}
 
-  execute(input: {
+  async execute(input: {
     tournamentId: UUID;
     roundNumber: number;
     stage?: string;
@@ -21,8 +21,8 @@ export class CreateMatchUseCase {
     scheduledAt?: string;
     participants: [Match["participants"][0], Match["participants"][1]];
     metadata?: Record<string, unknown>;
-  }): Match {
-    const tournament = this.tournaments.findById(input.tournamentId);
+  }): Promise<Match> {
+    const tournament = await this.tournaments.findById(input.tournamentId);
     if (!tournament) {
       throw new Error("Tournament not found");
     }
@@ -37,13 +37,13 @@ export class CreateMatchUseCase {
       id: this.ids.generate(),
       tournamentId: tournament.id,
       roundNumber: input.roundNumber,
-      stage: input.stage,
-      bestOf: input.bestOf,
-      scheduledAt: input.scheduledAt,
-      completedAt: undefined,
+      stage: input.stage ?? null,
+      bestOf: input.bestOf ?? null,
+      scheduledAt: input.scheduledAt ?? null,
+      completedAt: null,
       format: tournament.format,
       participants: input.participants,
-      metadata: input.metadata,
+      // metadata: input.metadata,
     };
 
     return this.matches.create(match);

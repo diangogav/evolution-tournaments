@@ -24,6 +24,7 @@ import type { AddTeamMemberUseCase } from "../../modules/teams/application/add-t
 import type { TeamMemberRepository } from "../../modules/teams/domain/team-member.repository";
 import type { CreateTournamentUseCase } from "../../modules/tournaments/application/create-tournament.use-case";
 import type { RegisterTournamentEntryUseCase } from "../../modules/tournaments/application/register-tournament-entry.use-case";
+import { GenerateSingleEliminationBracketUseCase } from "../../modules/tournaments/application/generate-single-elimination-bracket.use-case";
 import type { TournamentRepository } from "../../modules/tournaments/domain/tournament.repository";
 import type { TournamentEntryRepository } from "../../modules/tournaments/domain/tournament-entry.repository";
 
@@ -37,6 +38,7 @@ export type HttpDependencies = {
     registerTournamentEntry: RegisterTournamentEntryUseCase;
     createGroup: CreateGroupUseCase;
     createMatch: CreateMatchUseCase;
+    generateSingleEliminationBracket: GenerateSingleEliminationBracketUseCase;
   };
   repositories: {
     players: PlayerRepository;
@@ -147,6 +149,17 @@ export const registerRoutes = (
           "/:id/entries",
           ({ params }) =>
             repositories.entries.listByTournament(params.id),
+          { params: t.Object({ id: IdentifierSchema }) }
+        )
+        .post(
+          "/:id/generate-bracket",
+          async ({ params, set }) => {
+            await useCases.generateSingleEliminationBracket.execute({
+              tournamentId: params.id,
+            });
+            set.status = 201;
+            return { message: "Bracket generated successfully" };
+          },
           { params: t.Object({ id: IdentifierSchema }) }
         )
     )

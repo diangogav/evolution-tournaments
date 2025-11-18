@@ -8,12 +8,12 @@ import type { MatchParticipant } from "./match-participant";
 export interface Match extends Identified {
   tournamentId: UUID;
   roundNumber: number;
-  stage?: string;
-  bestOf?: number;
-  scheduledAt?: string;
-  completedAt?: string;
-  format?: TournamentFormat;
-  participants: [MatchParticipant, MatchParticipant];
-  metadata?: Record<string, unknown>;
+  stage: string | null;
+  bestOf: number | null;
+  scheduledAt: string | null;
+  completedAt: string | null;
+  format: TournamentFormat | null;
+  participants: MatchParticipant[];
+  // metadata?: Record<string, unknown>;
 }
 

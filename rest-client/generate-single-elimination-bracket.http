@@ -1,0 +1,6 @@
+POST http://localhost:3000/tournaments/d80be3b2-e0b4-4def-bc71-581be62bbf22/generate-bracket HTTP/1.1
+content-type: application/json
+
+{
+
+}

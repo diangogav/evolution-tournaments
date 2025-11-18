@@ -18,21 +18,21 @@ export class PrismaMatchRepository implements MatchRepository {
         completedAt: match.completedAt,
         format: match.format,
         participants: match.participants as any,
-        metadata: match.metadata,
+        // metadata: match.metadata,
       },
     });
 
     return {
       ...newMatch,
-      participants: newMatch.participants as [MatchParticipant, MatchParticipant],
-    };
+      participants: newMatch.participants as any
+    }
   }
 
   async list(): Promise<Match[]> {
     const matches = await this.prisma.match.findMany();
     return matches.map((m) => ({
       ...m,
-      participants: m.participants as [MatchParticipant, MatchParticipant],
+      participants: m.participants as any,
     }));
   }
 }
