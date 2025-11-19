@@ -1,32 +1,36 @@
-import type { Player } from "../../../domain/player";
 import type { PlayerRepository } from "../../../domain/player.repository";
-import { PrismaClient } from "../../../../../generated/prisma";
 import type { UUID } from "../../../../shared/types";
+import { Player } from "../../../domain/player";
+import { PrismaClient } from "@prisma/client";
+import { isJsonRecord } from "../../../../shared/isJsonObject";
 
 export class PrismaPlayerRepository implements PlayerRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
   async create(player: Player): Promise<Player> {
-    const newPlayer = await this.prisma.player.create({
+    const data = player.toPrimitives();
+  
+    const stored = await this.prisma.player.create({
       data: {
-        id: player.id,
-        displayName: player.displayName,
-        nickname: player.nickname,
-        birthDate: player.birthDate,
-        countryCode: player.countryCode,
-        contactEmail: player.contactEmail,
-        preferredDisciplines: player.preferredDisciplines,
-        isActive: player.isActive,
-        metadata: player.metadata,
+        ...data,
+        metadata: JSON.parse(JSON.stringify(data.metadata)), // convierte a JSON-safe
       },
     });
-
-    return newPlayer as Player;
+  
+    return Player.create({
+      ...stored,
+      metadata: stored.metadata ?? {},
+    });
   }
 
   async list(): Promise<Player[]> {
     const players = await this.prisma.player.findMany();
-    return players as Player[];
+    return players.map((player) => Player.create({
+      ...player,
+      metadata: {
+        ...player.metadata as {}
+      }
+    }));
   }
 
   async findById(id: UUID): Promise<Player | null> {
@@ -34,10 +38,12 @@ export class PrismaPlayerRepository implements PlayerRepository {
       where: { id },
     });
 
-    if (!player) {
-      return null;
-    }
-
-    return player as Player;
+    return player ? Player.create({
+      ...player,
+      metadata: {
+        ...player.metadata as {}
+      }
+    }) : null;
   }
 }
+

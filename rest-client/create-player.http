@@ -11,7 +11,10 @@ POST http://localhost:3000/players HTTP/1.1
 content-type: application/json
 
 {
-  "displayName": "Joey Wheeler"
+  "displayName": "Joey Wheeler",
+  "metadata": {
+    "position": 1
+  }
 }
 
 POST http://localhost:3000/players HTTP/1.1
@@ -25,7 +28,8 @@ POST http://localhost:3000/players HTTP/1.1
 content-type: application/json
 
 {
-  "displayName": "Mai Valentine"
+  "displayName": "Mai Valentine",
+  "metadata": "harpie lady"
 }
 
 POST http://localhost:3000/players HTTP/1.1
@@ -46,19 +50,24 @@ POST http://localhost:3000/players HTTP/1.1
 content-type: application/json
 
 {
-  "displayName": "Yami Bakura"
+  "displayName": "Yami Bakura",
+  "metadata": "metadata"
 }
 
 POST http://localhost:3000/players HTTP/1.1
 content-type: application/json
 
 {
-  "displayName": "Yami Ishtar"
+  "displayName": "Yami Ishtar",
+  "metadata": {
+    "hello": "world"
+  }
 }
 
 POST http://localhost:3000/players HTTP/1.1
 content-type: application/json
 
 {
-  "displayName": "Rex Raptor"
+  "displayName": "Rex Raptor",
+  "metadata": "metadata"
 }

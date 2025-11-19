@@ -21,7 +21,6 @@ import { InMemoryTournamentRepository } from "./modules/tournaments/infrastructu
 import { InMemoryTournamentEntryRepository } from "./modules/tournaments/infrastructure/persistence/in-memory/tournament-entry.repository";
 import { InMemoryGroupRepository } from "./modules/groups/infrastructure/persistence/in-memory/group.repository";
 import { InMemoryMatchRepository } from "./modules/matches/infrastructure/persistence/in-memory/match.repository";
-import { PrismaClient } from "./generated/prisma";
 import { PrismaPlayerRepository } from "./modules/players/infrastructure/persistence/prisma/player.repository";
 import { PrismaTeamRepository } from "./modules/teams/infrastructure/persistence/prisma/team.repository";
 import { PrismaTeamMemberRepository } from "./modules/teams/infrastructure/persistence/prisma/team-member.repository";
@@ -30,6 +29,7 @@ import { PrismaTournamentRepository } from "./modules/tournaments/infrastructure
 import { PrismaTournamentEntryRepository } from "./modules/tournaments/infrastructure/persistence/prisma/tournament-entry.repository";
 import { PrismaGroupRepository } from "./modules/groups/infrastructure/persistence/prisma/group.repository";
 import { PrismaMatchRepository } from "./modules/matches/infrastructure/persistence/prisma/match.repository";
+import { PrismaClient } from "@prisma/client";
 
 export const buildApp = async () => {
   const usePrisma = process.env.USE_PRISMA === "true";

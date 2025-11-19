@@ -1,65 +1,196 @@
-import { PrismaClient } from '../src/generated/prisma';
+import pkg from '@prisma/client';
+const { PrismaClient, ParticipantType, TournamentFormat, TournamentStatus, TournamentEntryStatus } = pkg;
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('Start seeding...');
+  console.log("🌱 Iniciando seed...");
 
-  // Create Players
-  const player1 = await prisma.player.upsert({
-    where: { id: 'a1b2c3d4-e5f6-7890-1234-567890abcdef' },
-    update: {},
-    create: {
-      id: 'a1b2c3d4-e5f6-7890-1234-567890abcdef',
-      displayName: 'Alice Smith',
-      contactEmail: 'alice@example.com',
-      isActive: true,
-      preferredDisciplines: ['Chess'],
+  //
+  // ───────────────────────────────────────────────
+  //  PLAYERS
+  // ───────────────────────────────────────────────
+  //
+  const playerA = await prisma.player.create({
+    data: {
+      displayName: "Juan Gamer",
+      nickname: "JG",
+      countryCode: "VE",
     },
   });
-  console.log(`Created player with id: ${player1.id}`);
 
-  const player2 = await prisma.player.upsert({
-    where: { id: 'b2c3d4e5-f6a7-8901-2345-67890abcdef0' },
-    update: {},
-    create: {
-      id: 'b2c3d4e5-f6a7-8901-2345-67890abcdef0',
-      displayName: 'Bob Johnson',
-      contactEmail: 'bob@example.com',
-      isActive: true,
-      preferredDisciplines: ['Poker'],
+  const playerB = await prisma.player.create({
+    data: {
+      displayName: "Diango Destroyer",
+      nickname: "Diango",
+      countryCode: "VE",
     },
   });
-  console.log(`Created player with id: ${player2.id}`);
 
-  // Create Teams
-  const team1 = await prisma.team.upsert({
-    where: { id: 'c3d4e5f6-a7b8-9012-3456-7890abcdef01' },
-    update: {},
-    create: {
-      id: 'c3d4e5f6-a7b8-9012-3456-7890abcdef01',
-      displayName: 'Team Alpha',
-      minMembers: 1,
-      maxMembers: 5,
-      isActive: true,
+  const playerC = await prisma.player.create({
+    data: {
+      displayName: "Luis Master",
+      nickname: "LM",
+      countryCode: "DO",
     },
   });
-  console.log(`Created team with id: ${team1.id}`);
 
-  const team2 = await prisma.team.upsert({
-    where: { id: 'd4e5f6a7-b8c9-0123-4567-890abcdef012' },
-    update: {},
-    create: {
-      id: 'd4e5f6a7-b8c9-0123-4567-890abcdef012',
-      displayName: 'Team Beta',
+  //
+  // ───────────────────────────────────────────────
+  //  TEAM
+  // ───────────────────────────────────────────────
+  //
+  const teamAlpha = await prisma.team.create({
+    data: {
+      displayName: "Team Alpha",
+      shortCode: "TA",
       minMembers: 2,
-      maxMembers: 10,
-      isActive: true,
+      maxMembers: 5,
+      countryCode: "VE",
     },
   });
-  console.log(`Created team with id: ${team2.id}`);
 
-  console.log('Seeding finished.');
+  await prisma.teamMember.create({
+    data: {
+      teamId: teamAlpha.id,
+      playerId: playerA.id,
+      role: "Captain",
+      isCaptain: true,
+      joinedAt: new Date().toISOString(),
+    },
+  });
+
+  await prisma.teamMember.create({
+    data: {
+      teamId: teamAlpha.id,
+      playerId: playerB.id,
+      role: "Player",
+      joinedAt: new Date().toISOString(),
+    },
+  });
+
+  //
+  // ───────────────────────────────────────────────
+  //  PARTICIPANTS (player + team)
+  // ───────────────────────────────────────────────
+  //
+  const participantPlayerA = await prisma.participant.create({
+    data: {
+      type: ParticipantType.PLAYER,
+      playerId: playerA.id,
+      displayName: playerA.displayName,
+      countryCode: "VE",
+      seeding: 1,
+    },
+  });
+
+  const participantPlayerB = await prisma.participant.create({
+    data: {
+      type: ParticipantType.PLAYER,
+      playerId: playerB.id,
+      displayName: playerB.displayName,
+      countryCode: "VE",
+      seeding: 2,
+    },
+  });
+
+  const participantTeamAlpha = await prisma.participant.create({
+    data: {
+      type: ParticipantType.TEAM,
+      teamId: teamAlpha.id,
+      displayName: teamAlpha.displayName,
+      countryCode: "VE",
+      seeding: 3,
+    },
+  });
+
+  //
+  // ───────────────────────────────────────────────
+  //  TOURNAMENT
+  // ───────────────────────────────────────────────
+  //
+  const tournament = await prisma.tournament.create({
+    data: {
+      name: "Torneo Demo Eliminación Directa",
+      discipline: "YGO",
+      format: TournamentFormat.SINGLE_ELIMINATION,
+      status: TournamentStatus.PUBLISHED,
+      allowMixedParticipants: true,
+      participantType: null,
+      location: "Online",
+    },
+  });
+
+  //
+  // ───────────────────────────────────────────────
+  //  TOURNAMENT ENTRIES
+  // ───────────────────────────────────────────────
+  //
+  const entryA = await prisma.tournamentEntry.create({
+    data: {
+      tournamentId: tournament.id,
+      participantId: participantPlayerA.id,
+      status: TournamentEntryStatus.CONFIRMED,
+      seed: 1,
+    },
+  });
+
+  const entryB = await prisma.tournamentEntry.create({
+    data: {
+      tournamentId: tournament.id,
+      participantId: participantPlayerB.id,
+      status: TournamentEntryStatus.CONFIRMED,
+      seed: 2,
+    },
+  });
+
+  const entryTeam = await prisma.tournamentEntry.create({
+    data: {
+      tournamentId: tournament.id,
+      participantId: participantTeamAlpha.id,
+      status: TournamentEntryStatus.CONFIRMED,
+      seed: 3,
+    },
+  });
+
+  //
+  // ───────────────────────────────────────────────
+  //  GROUP (si hay fase de grupos futura)
+  // ───────────────────────────────────────────────
+  //
+  const groupA = await prisma.group.create({
+    data: {
+      name: "Grupo A",
+      tournamentId: tournament.id,
+    },
+  });
+
+  // Asociar uno al grupo (opcional)
+  await prisma.tournamentEntry.update({
+    where: { id: entryA.id },
+    data: { groupId: groupA.id },
+  });
+
+  //
+  // ───────────────────────────────────────────────
+  //  MATCH
+  // ───────────────────────────────────────────────
+  //
+  await prisma.match.create({
+    data: {
+      tournamentId: tournament.id,
+      roundNumber: 1,
+      stage: "Round 1",
+      bestOf: 3,
+      scheduledAt: new Date().toISOString(),
+      participants: [
+        { participantId: participantPlayerA.id, score: 0 },
+        { participantId: participantPlayerB.id, score: 0 },
+      ],
+    },
+  });
+
+  console.log("🌱 Seed completado exitosamente");
 }
 
 main()

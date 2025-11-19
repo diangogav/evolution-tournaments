@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -8,24 +7,31 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+//
+// ───────────────────────────────────────────────
+//  PLAYERS / TEAMS / PARTICIPANTS
+// ───────────────────────────────────────────────
+//
+
 model Player {
-  id                   String       @id @default(uuid())
+  id                   String   @id @default(uuid())
   displayName          String
   nickname             String?
   birthDate            String?
   countryCode          String?
-  contactEmail         String?      @unique
+  contactEmail         String?  @unique
   preferredDisciplines String[]
-  isActive             Boolean      @default(true)
+  isActive             Boolean  @default(true)
   metadata             Json?
-  teamMembers          TeamMember[]
-  participant          Participant?
+
+  teamMembers TeamMember[]
+  participant Participant?
 
   @@map("players")
 }
 
 model Team {
-  id          String       @id @default(uuid())
+  id          String  @id @default(uuid())
   displayName String
   shortCode   String?
   logoUrl     String?
@@ -33,8 +39,9 @@ model Team {
   minMembers  Int
   maxMembers  Int
   countryCode String?
-  isActive    Boolean      @default(true)
+  isActive    Boolean @default(true)
   metadata    Json?
+
   teamMembers TeamMember[]
   participant Participant?
 
@@ -44,95 +51,139 @@ model Team {
 model TeamMember {
   id        String  @id @default(uuid())
   teamId    String
-  team      Team    @relation(fields: [teamId], references: [id])
-  playerId  String  @unique
-  player    Player  @relation(fields: [playerId], references: [id])
+  playerId  String
   role      String?
   isCaptain Boolean @default(false)
   joinedAt  String
   leftAt    String?
 
+  team   Team   @relation(fields: [teamId], references: [id])
+  player Player @relation(fields: [playerId], references: [id])
+
+  @@unique([teamId, playerId], name: "unique_member_per_team")
   @@map("team_members")
 }
 
+//
+// ───────────────────────────────────────────────
+//  PARTICIPANTS (player or team "normalized")
+// ───────────────────────────────────────────────
+//
+
 model Participant {
-  id          String            @id @default(uuid())
+  id          String          @id @default(uuid())
   type        ParticipantType
-  playerId    String?           @unique
-  player      Player?           @relation(fields: [playerId], references: [id])
-  teamId      String?           @unique
-  team        Team?             @relation(fields: [teamId], references: [id])
+  playerId    String?         @unique
+  teamId      String?         @unique
   displayName String
   countryCode String?
   seeding     Int?
   metadata    Json?
-  entries     TournamentEntry[]
+
+  player  Player?           @relation(fields: [playerId], references: [id])
+  team    Team?             @relation(fields: [teamId], references: [id])
+  entries TournamentEntry[]
 
   @@map("participants")
 }
 
+//
+// ───────────────────────────────────────────────
+//  TOURNAMENTS
+// ───────────────────────────────────────────────
+//
+
 model Tournament {
-  id                     String            @id @default(uuid())
+  id                     String           @id @default(uuid())
   name                   String
   description            String?
   discipline             String
   format                 TournamentFormat
   status                 TournamentStatus
-  allowMixedParticipants Boolean           @default(false)
+  allowMixedParticipants Boolean          @default(false)
   participantType        ParticipantType?
   maxParticipants        Int?
   startAt                String?
   endAt                  String?
   location               String?
   metadata               Json?
-  entries                TournamentEntry[]
-  groups                 Group[]
-  matches                Match[]
+
+  entries TournamentEntry[]
+  groups  Group[]
+  matches Match[]
 
   @@map("tournaments")
 }
 
+//
+// ───────────────────────────────────────────────
+//  ENTRIES (participants in tournaments)
+// ───────────────────────────────────────────────
+//
+
 model TournamentEntry {
   id            String                @id @default(uuid())
   tournamentId  String
-  tournament    Tournament            @relation(fields: [tournamentId], references: [id])
   participantId String
-  participant   Participant           @relation(fields: [participantId], references: [id])
   status        TournamentEntryStatus
   groupId       String?
-  group         Group?                @relation(fields: [groupId], references: [id])
   seed          Int?
   metadata      Json?
 
+  tournament  Tournament  @relation(fields: [tournamentId], references: [id])
+  participant Participant @relation(fields: [participantId], references: [id])
+  group       Group?      @relation(fields: [groupId], references: [id])
+
+  @@unique([tournamentId, participantId], name: "unique_entry_per_tournament")
   @@map("tournament_entries")
 }
 
+//
+// ───────────────────────────────────────────────
+//  GROUPS (round robin or swiss pools)
+// ───────────────────────────────────────────────
+//
+
 model Group {
-  id           String            @id @default(uuid())
+  id           String @id @default(uuid())
   tournamentId String
-  tournament   Tournament        @relation(fields: [tournamentId], references: [id])
   name         String
-  participants TournamentEntry[]
   metadata     Json?
+
+  tournament   Tournament        @relation(fields: [tournamentId], references: [id])
+  participants TournamentEntry[]
 
   @@map("groups")
 }
 
+//
+// ───────────────────────────────────────────────
+//  MATCHES
+// ───────────────────────────────────────────────
+//
+
 model Match {
   id           String            @id @default(uuid())
   tournamentId String
-  tournament   Tournament        @relation(fields: [tournamentId], references: [id])
   roundNumber  Int
   stage        String?
   bestOf       Int?
   scheduledAt  String?
   completedAt  String?
   format       TournamentFormat?
-  participants Json // MatchParticipant is a complex type, using Json for now
+  participants Json // [{ participantId, score, ... }]
   metadata     Json?
+
+  tournament Tournament @relation(fields: [tournamentId], references: [id])
 
   @@map("matches")
 }
+
+//
+// ───────────────────────────────────────────────
+//  ENUMS
+// ───────────────────────────────────────────────
+//
 
 enum ParticipantType {
   PLAYER

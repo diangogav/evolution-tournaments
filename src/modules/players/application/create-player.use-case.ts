@@ -1,5 +1,5 @@
+import { Player, PlayerProps } from "../domain/player";
 import type { IdGenerator } from "../../shared/ports";
-import type { Player } from "../domain/player";
 import type { PlayerRepository } from "../domain/player.repository";
 
 export class CreatePlayerUseCase {
@@ -15,22 +15,26 @@ export class CreatePlayerUseCase {
     countryCode?: string;
     contactEmail?: string;
     preferredDisciplines?: string[];
-    isActive?: boolean;
     metadata?: Record<string, unknown>;
-  }): Promise<Player> {
-    const player: Player = {
+  }): Promise<PlayerProps> {
+    if (!input.displayName || input.displayName.trim().length === 0) {
+      throw new Error("Player.displayName cannot be empty");
+    }
+
+    const player = Player.create({
       id: this.ids.generate(),
       displayName: input.displayName,
-      nickname: input.nickname,
-      birthDate: input.birthDate,
-      countryCode: input.countryCode,
-      contactEmail: input.contactEmail,
-      preferredDisciplines: input.preferredDisciplines,
-      isActive: input.isActive ?? true,
-      metadata: input.metadata,
-    };
+      nickname: input.nickname ?? null,
+      birthDate: input.birthDate ?? null,
+      countryCode: input.countryCode ?? null,
+      contactEmail: input.contactEmail ?? null,
+      preferredDisciplines: input.preferredDisciplines ?? [],
+      isActive: true,
+      metadata: input.metadata ?? {},
+    });
 
-    return this.players.create(player);
+    const createdPlayer = await this.players.create(player);
+
+    return createdPlayer.toPrimitives();
   }
 }
-
