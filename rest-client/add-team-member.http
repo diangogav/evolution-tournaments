@@ -1,0 +1,7 @@
+POST http://localhost:3000/teams/members HTTP/1.1
+content-type: application/json
+
+{
+  "teamId": "cdc722df-cfad-4c37-8a90-dd4d108eac14",
+  "playerId": "6b207698-e394-4162-9ec2-49cb31c7b861"
+}
