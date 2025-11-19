@@ -25,77 +25,101 @@ export class GenerateSingleEliminationBracketUseCase {
   }
 
   async execute(input: { tournamentId: UUID }): Promise<void> {
-    const tournament = await this.tournaments.findById(input.tournamentId);
-    if (!tournament) {
-      throw new Error("Tournament not found");
-    }
+    const tournament = await this.ensureValidTournament(input.tournamentId);
+    const confirmed = this.getSortedConfirmedParticipants(
+      await this.entries.listByTournament(tournament.id)
+    );
+    this.ensureEnoughParticipants(confirmed);
+    this.ensurePowerOfTwo(confirmed.length);
+    const bracketOrder = this.generateBracketOrder(confirmed);
+    const createdMatches = await this.createRoundOneMatches({
+      tournamentId: tournament.id,
+      participants: bracketOrder,
+    });
+    console.log("Generated matches:", createdMatches);
+  }
+
+  private async ensureValidTournament(tournamentId: UUID) {
+    const tournament = await this.tournaments.findById(tournamentId);
+    if (!tournament) throw new Error("Tournament not found");
 
     if (tournament.format !== "SINGLE_ELIMINATION") {
       throw new Error("Tournament format is not SINGLE_ELIMINATION");
     }
 
-    const entries = await this.entries.listByTournament(input.tournamentId);
-    const participants = entries
-      .filter((e) => e.status === "CONFIRMED")
-      .sort((a, b) => (a.seed ?? Infinity) - (b.seed ?? Infinity));
-
-    if (participants.length < 2) {
-      throw new Error("Not enough participants to generate a bracket");
-    }
-
-    // For simplicity, we'll start with powers of 2
-    const isPowerOfTwo = (n: number) => (n & (n - 1)) === 0;
-    if (!isPowerOfTwo(participants.length)) {
-      // TODO: Handle byes for non-power-of-two participants
-      throw new Error("Number of participants must be a power of two");
-    }
-
-    const bracketParticipants = this.sortParticipantsForBracket(participants);
-
-    const round1Matches = [];
-    for (let i = 0; i < bracketParticipants.length / 2; i++) {
-      const participant1 = bracketParticipants[i * 2];
-      const participant2 = bracketParticipants[i * 2 + 1];
-
-      const match = await this.createMatch.execute({
-        tournamentId: tournament.id,
-        roundNumber: 1,
-        participants: [
-          { participantId: participant1.participantId },
-          { participantId: participant2.participantId },
-        ],
-        metadata: {
-          position: i + 1,
-        },
-      });
-      round1Matches.push(match);
-    }
-
-    // In a real scenario, we would save the matches
-    console.log("Generated matches:", round1Matches);
+    return tournament;
   }
 
-  private sortParticipantsForBracket<T extends { seed?: number }>(
-    participants: T[]
-  ): T[] {
+  private getSortedConfirmedParticipants(entries: any[]) {
+    return entries
+      .filter((e) => e.status === "CONFIRMED")
+      .sort((a, b) => (a.seed ?? Infinity) - (b.seed ?? Infinity));
+  }
+
+  private ensureEnoughParticipants(confirmed: any[]) {
+    if (confirmed.length < 2) {
+      throw new Error("Not enough participants to generate a bracket");
+    }
+  }
+
+  private ensurePowerOfTwo(n: number) {
+    const isPowerOfTwo = (x: number) => (x & (x - 1)) === 0;
+    if (!isPowerOfTwo(n)) {
+      // Próxima versión → integrar BYES
+      throw new Error("Number of participants must be a power of two");
+    }
+  }
+
+  private generateBracketOrder<T extends { seed?: number }>(participants: T[]): T[] {
     const n = participants.length;
+    const rounds = Math.log2(n);
+
     let seeds = [1];
-    for (let i = 1; i < Math.log2(n); i++) {
-      const nextSeeds = [];
-      for (const seed of seeds) {
-        nextSeeds.push(seed);
-        nextSeeds.push(2 ** i + 1 - seed);
+    for (let i = 1; i < rounds; i++) {
+      const next = [];
+      for (const s of seeds) {
+        next.push(s);
+        next.push(2 ** i + 1 - s);
       }
-      seeds = nextSeeds;
+      seeds = next;
     }
 
-    const bracketOrder: T[] = [];
+    const order: T[] = [];
     for (const seed of seeds) {
-      bracketOrder.push(participants[seed - 1]);
-      bracketOrder.push(participants[n - seed]);
+      order.push(participants[seed - 1]);
+      order.push(participants[n - seed]);
     }
 
-    return bracketOrder;
+    return order;
+  }
+
+  private async createRoundOneMatches(params: {
+    tournamentId: UUID;
+    participants: Array<{ participantId: UUID }>;
+  }) {
+    const { tournamentId, participants } = params;
+
+    const matches = [];
+    const total = participants.length / 2;
+
+    for (let i = 0; i < total; i++) {
+      const p1 = participants[i * 2];
+      const p2 = participants[i * 2 + 1];
+
+      const match = await this.createMatch.execute({
+        tournamentId,
+        roundNumber: 1,
+        participants: [
+          { participantId: p1.participantId },
+          { participantId: p2.participantId },
+        ],
+        metadata: { position: i + 1 },
+      });
+
+      matches.push(match);
+    }
+
+    return matches;
   }
 }
 
