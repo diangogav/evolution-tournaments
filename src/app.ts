@@ -1,8 +1,23 @@
+// src/app.ts
 import { Elysia } from "elysia";
+import { PrismaClient } from "@prisma/client";
+
 import { registerRoutes } from "./infrastructure/http/routes";
-import { InMemoryDatabase } from "./infrastructure/persistence/in-memory/database";
+
 import { RandomIdGenerator } from "./modules/shared/infrastructure/services/id-generator";
 import { SystemClock } from "./modules/shared/infrastructure/services/clock";
+
+// Prisma Repositories
+import { PrismaPlayerRepository } from "./modules/players/infrastructure/persistence/prisma/player.repository";
+import { PrismaTeamRepository } from "./modules/teams/infrastructure/persistence/prisma/team.repository";
+import { PrismaTeamMemberRepository } from "./modules/teams/infrastructure/persistence/prisma/team-member.repository";
+import { PrismaParticipantRepository } from "./modules/participants/infrastructure/persistence/prisma/participant.repository";
+import { PrismaTournamentRepository } from "./modules/tournaments/infrastructure/persistence/prisma/tournament.repository";
+import { PrismaTournamentEntryRepository } from "./modules/tournaments/infrastructure/persistence/prisma/tournament-entry.repository";
+import { PrismaGroupRepository } from "./modules/groups/infrastructure/persistence/prisma/group.repository";
+import { PrismaMatchRepository } from "./modules/matches/infrastructure/persistence/prisma/match.repository";
+
+// Use Cases
 import { CreatePlayerUseCase } from "./modules/players/application/create-player.use-case";
 import { CreateTeamUseCase } from "./modules/teams/application/create-team.use-case";
 import { AddTeamMemberUseCase } from "./modules/teams/application/add-team-member.use-case";
@@ -13,55 +28,37 @@ import { CreateGroupUseCase } from "./modules/groups/application/create-group.us
 import { CreateMatchUseCase } from "./modules/matches/application/create-match.use-case";
 import { RecordMatchResultUseCase } from "./modules/matches/application/record-match-result.use-case";
 import { GenerateSingleEliminationBracketUseCase } from "./modules/tournaments/application/generate-single-elimination-bracket.use-case";
-import { InMemoryPlayerRepository } from "./modules/players/infrastructure/persistence/in-memory/player.repository";
-import { InMemoryTeamRepository } from "./modules/teams/infrastructure/persistence/in-memory/team.repository";
-import { InMemoryTeamMemberRepository } from "./modules/teams/infrastructure/persistence/in-memory/team-member.repository";
-import { InMemoryParticipantRepository } from "./modules/participants/infrastructure/persistence/in-memory/participant.repository";
-import { InMemoryTournamentRepository } from "./modules/tournaments/infrastructure/persistence/in-memory/tournament.repository";
-import { InMemoryTournamentEntryRepository } from "./modules/tournaments/infrastructure/persistence/in-memory/tournament-entry.repository";
-import { InMemoryGroupRepository } from "./modules/groups/infrastructure/persistence/in-memory/group.repository";
-import { InMemoryMatchRepository } from "./modules/matches/infrastructure/persistence/in-memory/match.repository";
-import { PrismaPlayerRepository } from "./modules/players/infrastructure/persistence/prisma/player.repository";
-import { PrismaTeamRepository } from "./modules/teams/infrastructure/persistence/prisma/team.repository";
-import { PrismaTeamMemberRepository } from "./modules/teams/infrastructure/persistence/prisma/team-member.repository";
-import { PrismaParticipantRepository } from "./modules/participants/infrastructure/persistence/prisma/participant.repository";
-import { PrismaTournamentRepository } from "./modules/tournaments/infrastructure/persistence/prisma/tournament.repository";
-import { PrismaTournamentEntryRepository } from "./modules/tournaments/infrastructure/persistence/prisma/tournament-entry.repository";
-import { PrismaGroupRepository } from "./modules/groups/infrastructure/persistence/prisma/group.repository";
-import { PrismaMatchRepository } from "./modules/matches/infrastructure/persistence/prisma/match.repository";
-import { PrismaClient } from "@prisma/client";
+import { ListMatchesByTournamentUseCase } from "./modules/matches/application/list-matches-by-tournament.use-case";
 
-export const buildApp = async () => {
-  const usePrisma = process.env.USE_PRISMA === "true";
+export const buildApp = async (externalPrisma?: PrismaClient) => {
+  const prisma = externalPrisma ?? new PrismaClient();
+
   const idGenerator = new RandomIdGenerator();
   const clock = new SystemClock();
 
-  let repositories;
-  if (usePrisma) {
-    const prisma = new PrismaClient();
-    repositories = {
-      players: new PrismaPlayerRepository(prisma),
-      teams: new PrismaTeamRepository(prisma),
-      teamMembers: new PrismaTeamMemberRepository(prisma),
-      participants: new PrismaParticipantRepository(prisma),
-      tournaments: new PrismaTournamentRepository(prisma),
-      entries: new PrismaTournamentEntryRepository(prisma),
-      groups: new PrismaGroupRepository(prisma),
-      matches: new PrismaMatchRepository(prisma),
-    } as const;
-  } else {
-    const db = new InMemoryDatabase();
-    repositories = {
-      players: new InMemoryPlayerRepository(db),
-      teams: new InMemoryTeamRepository(db),
-      teamMembers: new InMemoryTeamMemberRepository(db),
-      participants: new InMemoryParticipantRepository(db),
-      tournaments: new InMemoryTournamentRepository(db),
-      entries: new InMemoryTournamentEntryRepository(db),
-      groups: new InMemoryGroupRepository(db),
-      matches: new InMemoryMatchRepository(db),
-    } as const;
-  }
+  // ----------------------------------------
+  // REPOSITORIES
+  // ----------------------------------------
+  const repositories = {
+    players: new PrismaPlayerRepository(prisma),
+    teams: new PrismaTeamRepository(prisma),
+    teamMembers: new PrismaTeamMemberRepository(prisma),
+    participants: new PrismaParticipantRepository(prisma),
+    tournaments: new PrismaTournamentRepository(prisma),
+    entries: new PrismaTournamentEntryRepository(prisma),
+    groups: new PrismaGroupRepository(prisma),
+    matches: new PrismaMatchRepository(prisma),
+  } as const;
+
+  // ----------------------------------------
+  // USE CASES
+  // ----------------------------------------
+  const createMatch = new CreateMatchUseCase(
+    repositories.matches,
+    repositories.tournaments,
+    repositories.participants,
+    idGenerator
+  )
 
   const useCases = {
     createPlayer: new CreatePlayerUseCase(repositories.players, idGenerator),
@@ -95,39 +92,39 @@ export const buildApp = async () => {
       repositories.participants,
       idGenerator
     ),
-    createMatch: new CreateMatchUseCase(
+    createMatch,
+    listMatchesByTournament: new ListMatchesByTournamentUseCase(
       repositories.matches,
       repositories.tournaments,
-      repositories.participants,
-      idGenerator
     ),
-
-// ...
-
     generateSingleEliminationBracket: new GenerateSingleEliminationBracketUseCase(
       repositories.tournaments,
       repositories.entries,
       repositories.matches,
       repositories.participants,
-      idGenerator
+      idGenerator,
+      createMatch,
     ),
     recordMatchResult: new RecordMatchResultUseCase(
       repositories.matches,
       repositories.tournaments,
       repositories.participants,
-      idGenerator
+      idGenerator,
+      createMatch,
     ),
   } as const;
 
-// ...
+  // ----------------------------------------
+  // BUILD APP
+  // ----------------------------------------
+  const app = registerRoutes(new Elysia(), {
+    useCases,
+    repositories
+  }).onError(({ error, set }) => {
+    console.error("❌ Internal Error:", error);
+    set.status = 500;
+    return { message: "Internal Server Error" };
+  });
 
-  const app = registerRoutes(new Elysia(), { useCases, repositories }).onError(
-    ({ error, set }) => {
-      console.error(error);
-      set.status = 500;
-      return { message: "Internal Server Error" };
-    }
-  );
-
-  return { app, repositories, useCases };
+  return { app, repositories, useCases, prisma };
 };

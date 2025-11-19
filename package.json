@@ -2,7 +2,7 @@
   "name": "tournaments",
   "version": "1.0.50",
   "scripts": {
-    "test": "vitest",
+    "test:e2e": "vitest --config vitest.node.config.ts",
     "dev": "bun run --watch src/index.ts",
     "migrate:deploy": "npx prisma migrate deploy",
     "db:seed": "npx prisma db seed"
@@ -11,15 +11,21 @@
     "seed": "ts-node --transpile-only prisma/seed.ts"
   },
   "dependencies": {
+    "@elysiajs/eden": "^1.4.5",
     "@prisma/client": "^6.19.0",
     "elysia": "latest",
     "pg": "^8.16.3"
   },
   "devDependencies": {
+    "@testcontainers/postgresql": "^11.8.1",
+    "@types/supertest": "^6.0.3",
+    "@vitest/coverage-c8": "^0.33.0",
+    "@vitest/ui": "^4.0.10",
     "bun-types": "latest",
+    "supertest": "^7.1.4",
+    "ts-node": "^10.9.2",
     "tsx": "^4.20.6",
-    "vitest": "^4.0.10",
-    "ts-node": "^10.9.2"
+    "vitest": "^4.0.10"
   },
   "module": "src/index.js"
 }

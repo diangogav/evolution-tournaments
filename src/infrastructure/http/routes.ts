@@ -29,6 +29,7 @@ import { GenerateSingleEliminationBracketUseCase } from "../../modules/tournamen
 import type { TournamentRepository } from "../../modules/tournaments/domain/tournament.repository";
 import type { TournamentEntryRepository } from "../../modules/tournaments/domain/tournament-entry.repository";
 import { RecordMatchResultUseCase } from "../../modules/matches/application/record-match-result.use-case";
+import { ListMatchesByTournamentUseCase } from "../../modules/matches/application/list-matches-by-tournament.use-case";
 
 export type HttpDependencies = {
   useCases: {
@@ -40,6 +41,7 @@ export type HttpDependencies = {
     registerTournamentEntry: RegisterTournamentEntryUseCase;
     createGroup: CreateGroupUseCase;
     createMatch: CreateMatchUseCase;
+    listMatchesByTournament: ListMatchesByTournamentUseCase;
     generateSingleEliminationBracket: GenerateSingleEliminationBracketUseCase;
     recordMatchResult: RecordMatchResultUseCase;
   };
@@ -69,7 +71,7 @@ export const registerRoutes = (
     }))
     .group("/players", (app) =>
       app
-        .get("/", () => repositories.players.list())
+        .get("/", async () => (await repositories.players.list()).map(p => p.toPrimitives()))
         .post(
           "/",
           ({ body, set }) => {
@@ -181,7 +183,11 @@ export const registerRoutes = (
     )
     .group("/matches", (app) =>
       app
-        .get("/", () => repositories.matches.list())
+        .get(
+          "/tournaments/:tournamentId",
+          async ({ params }) => (await (useCases.listMatchesByTournament.execute({ tournamentId: params.tournamentId }))).map(m => m.toPrimitives()),
+          { params: t.Object({ tournamentId: IdentifierSchema }) }
+        )
         .post(
           "/",
           ({ body, set }) => {
