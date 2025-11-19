@@ -132,19 +132,19 @@ export const registerRoutes = (
         )
         .post(
           "/",
-          ({ body, set }) => {
-            const tournament = useCases.createTournament.execute(body);
+          async ({ body, set }) => {
+            const tournament = await useCases.createTournament.execute(body);
             set.status = 201;
-            return tournament;
+            return tournament.toPrimitives();
           },
           { body: CreateTournamentBody }
         )
         .post(
           "/entries",
-          ({ body, set }) => {
-            const entry = useCases.registerTournamentEntry.execute(body);
+          async ({ body, set }) => {
+            const entry = await useCases.registerTournamentEntry.execute(body);
             set.status = 201;
-            return entry;
+            return entry.toPrimitives();
           },
           { body: CreateTournamentEntryBody }
         )

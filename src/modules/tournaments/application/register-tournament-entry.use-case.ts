@@ -1,7 +1,7 @@
 import type { IdGenerator } from "../../shared/ports";
 import type { TournamentEntryStatus, UUID } from "../../shared/types";
 import type { ParticipantRepository } from "../../participants/domain/participant.repository";
-import type { TournamentEntry } from "../domain/tournament-entry";
+import { TournamentEntry } from "../domain/tournament-entry";
 import type { TournamentEntryRepository } from "../domain/tournament-entry.repository";
 import type { TournamentRepository } from "../domain/tournament.repository";
 
@@ -11,7 +11,7 @@ export class RegisterTournamentEntryUseCase {
     private readonly tournaments: TournamentRepository,
     private readonly participants: ParticipantRepository,
     private readonly ids: IdGenerator
-  ) {}
+  ) { }
 
   async execute(input: {
     tournamentId: UUID;
@@ -40,23 +40,36 @@ export class RegisterTournamentEntryUseCase {
     const existingEntries = await this.entries.listByTournament(
       input.tournamentId
     );
+
+    // evitar duplicados
+    if (existingEntries.some((e) => e.participantId === participant.id)) {
+      throw new Error("Participant already registered in this tournament");
+    }
+
+    // validar maxParticipants
+    if (
+      tournament.maxParticipants &&
+      existingEntries.length >= tournament.maxParticipants
+    ) {
+      throw new Error("Tournament is full");
+    }
+
     const maxSeed = existingEntries.reduce(
       (max, entry) => (entry.seed && entry.seed > max ? entry.seed : max),
       0
     );
     const nextSeed = maxSeed + 1;
 
-    const entry: TournamentEntry = {
+    const entry = TournamentEntry.create({
       id: this.ids.generate(),
       tournamentId: tournament.id,
       participantId: participant.id,
       status: input.status ?? "PENDING",
-      groupId: input.groupId,
+      groupId: input.groupId ?? null,
       seed: nextSeed,
-      metadata: input.metadata,
-    };
+      metadata: input.metadata ?? {},
+    });
 
     return this.entries.create(entry);
   }
 }
-

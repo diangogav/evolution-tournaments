@@ -2,31 +2,31 @@ POST http://localhost:3000/tournaments/entries HTTP/1.1
 content-type: application/json
 
 {
-  "tournamentId": "d80be3b2-e0b4-4def-bc71-581be62bbf22",
-  "participantId": "9c8b5451-1448-4b00-a8e8-afa657125a2d"
+  "tournamentId": "1d3bbefa-4d1d-459e-9fc1-4d58cd0a28d0",
+  "participantId": "255a2a66-ee9a-4d07-9a79-3c54bda276a9"
 }
 
 POST http://localhost:3000/tournaments/entries HTTP/1.1
 content-type: application/json
 
 {
-  "tournamentId": "d80be3b2-e0b4-4def-bc71-581be62bbf22",
-  "participantId": "de4b8f07-e708-484e-8f22-7b2d727509df"
+  "tournamentId": "1d3bbefa-4d1d-459e-9fc1-4d58cd0a28d0",
+  "participantId": "e8346c39-576a-401a-b1be-cc830b8d94f5"
 }
 
 POST http://localhost:3000/tournaments/entries HTTP/1.1
 content-type: application/json
 
 {
-  "tournamentId": "d80be3b2-e0b4-4def-bc71-581be62bbf22",
-  "participantId": "f4283fa9-1f61-4d6c-bb20-af1c4ec7b87b"
+  "tournamentId": "1d3bbefa-4d1d-459e-9fc1-4d58cd0a28d0",
+  "participantId": "47a3e72f-ec09-4382-9467-533c0b8d5b50"
 }
 
 POST http://localhost:3000/tournaments/entries HTTP/1.1
 content-type: application/json
 
 {
-  "tournamentId": "d80be3b2-e0b4-4def-bc71-581be62bbf22",
+  "tournamentId": "1d3bbefa-4d1d-459e-9fc1-4d58cd0a28d0",
   "participantId": "89b89446-1698-4085-aa58-0e41137e4dae"
 }
 
@@ -34,7 +34,7 @@ POST http://localhost:3000/tournaments/entries HTTP/1.1
 content-type: application/json
 
 {
-  "tournamentId": "d80be3b2-e0b4-4def-bc71-581be62bbf22",
+  "tournamentId": "1d3bbefa-4d1d-459e-9fc1-4d58cd0a28d0",
   "participantId": "b20258e3-39e2-41c0-ad89-b488af591cbc"
 }
 
@@ -42,7 +42,7 @@ POST http://localhost:3000/tournaments/entries HTTP/1.1
 content-type: application/json
 
 {
-  "tournamentId": "d80be3b2-e0b4-4def-bc71-581be62bbf22",
+  "tournamentId": "1d3bbefa-4d1d-459e-9fc1-4d58cd0a28d0",
   "participantId": "a2a48c52-a42e-4ee9-9256-0fdaaba0217f"
 }
 
@@ -50,7 +50,7 @@ POST http://localhost:3000/tournaments/entries HTTP/1.1
 content-type: application/json
 
 {
-  "tournamentId": "d80be3b2-e0b4-4def-bc71-581be62bbf22",
+  "tournamentId": "1d3bbefa-4d1d-459e-9fc1-4d58cd0a28d0",
   "participantId": "a3623609-f958-4a3c-8f2e-000349fc7050"
 }
 
@@ -58,7 +58,7 @@ POST http://localhost:3000/tournaments/entries HTTP/1.1
 content-type: application/json
 
 {
-  "tournamentId": "d80be3b2-e0b4-4def-bc71-581be62bbf22",
+  "tournamentId": "1d3bbefa-4d1d-459e-9fc1-4d58cd0a28d0",
   "participantId": "26d5fe86-4e82-4ef0-8bcf-b96c101e4e8f"
 }
 
@@ -66,6 +66,6 @@ POST http://localhost:3000/tournaments/entries HTTP/1.1
 content-type: application/json
 
 {
-  "tournamentId": "d80be3b2-e0b4-4def-bc71-581be62bbf22",
+  "tournamentId": "1d3bbefa-4d1d-459e-9fc1-4d58cd0a28d0",
   "participantId": "c1d24e21-df40-48f5-b92f-e334b4f18454"
 }

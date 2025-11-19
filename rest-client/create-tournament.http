@@ -2,7 +2,7 @@ POST http://localhost:3000/tournaments HTTP/1.1
 content-type: application/json
 
 {
-  "name": "Evolution Tournament 2",
+  "name": "Evolution Tournament 4",
   "discipline": "Yu-Gi-Oh!",
   "format": "SINGLE_ELIMINATION",
   "status": "PUBLISHED",
@@ -10,6 +10,6 @@ content-type: application/json
   "participantType": "PLAYER",
   "maxParticipants": 8,
   "metadata": {
-    "tournament-number": 2
+    "tournament-number": 4
   }
 }

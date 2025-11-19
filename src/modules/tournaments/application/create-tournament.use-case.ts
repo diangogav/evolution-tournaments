@@ -4,14 +4,14 @@ import type {
   TournamentFormat,
   TournamentStatus,
 } from "../../shared/types";
-import type { Tournament } from "../domain/tournament";
+import { Tournament } from "../domain/tournament";
 import type { TournamentRepository } from "../domain/tournament.repository";
 
 export class CreateTournamentUseCase {
   constructor(
     private readonly tournaments: TournamentRepository,
     private readonly ids: IdGenerator
-  ) {}
+  ) { }
 
   async execute(input: {
     name: string;
@@ -27,30 +27,22 @@ export class CreateTournamentUseCase {
     location?: string;
     metadata?: Record<string, unknown>;
   }): Promise<Tournament> {
-    const allowMixed = input.allowMixedParticipants ?? false;
-    if (!allowMixed && !input.participantType) {
-      throw new Error(
-        "participantType is required when mixed participants are disabled"
-      );
-    }
-
-    const tournament: Tournament = {
+    const tournament = Tournament.create({
       id: this.ids.generate(),
       name: input.name,
-      description: input.description,
+      description: input.description ?? null,
       discipline: input.discipline,
       format: input.format,
       status: input.status,
-      allowMixedParticipants: allowMixed,
-      participantType: input.participantType,
-      maxParticipants: input.maxParticipants,
-      startAt: input.startAt,
-      endAt: input.endAt,
-      location: input.location,
-      metadata: input.metadata,
-    };
+      allowMixedParticipants: input.allowMixedParticipants ?? false,
+      participantType: input.participantType ?? null,
+      maxParticipants: input.maxParticipants ?? null,
+      startAt: input.startAt ?? null,
+      endAt: input.endAt ?? null,
+      location: input.location ?? null,
+      metadata: input.metadata ?? {},
+    });
 
     return this.tournaments.create(tournament);
   }
 }
-

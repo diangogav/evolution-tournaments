@@ -1,32 +1,52 @@
-import type { TournamentEntry } from "../../../domain/tournament-entry";
+import { TournamentEntry } from "../../../domain/tournament-entry";
 import type { TournamentEntryRepository } from "../../../domain/tournament-entry.repository";
-import { PrismaClient } from "../../../../../generated/prisma";
 import type { UUID } from "../../../../shared/types";
+import { PrismaClient } from "@prisma/client";
 
 export class PrismaTournamentEntryRepository implements TournamentEntryRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
   async create(entry: TournamentEntry): Promise<TournamentEntry> {
-    const newEntry = await this.prisma.tournamentEntry.create({
+    const data = entry.toPrimitives();
+
+    const stored = await this.prisma.tournamentEntry.create({
       data: {
-        id: entry.id,
-        tournamentId: entry.tournamentId,
-        participantId: entry.participantId,
-        status: entry.status,
-        groupId: entry.groupId,
-        seed: entry.seed,
-        // metadata: entry.metadata,
+        id: data.id,
+        tournamentId: data.tournamentId,
+        participantId: data.participantId,
+        status: data.status,
+        groupId: data.groupId,
+        seed: data.seed,
+        metadata: JSON.parse(JSON.stringify(data.metadata)),
       },
     });
 
-    return newEntry as TournamentEntry;
+    return TournamentEntry.create({
+      id: stored.id,
+      tournamentId: stored.tournamentId,
+      participantId: stored.participantId,
+      status: stored.status,
+      groupId: stored.groupId,
+      seed: stored.seed,
+      metadata: stored.metadata ?? {},
+    });
   }
 
   async listByTournament(tournamentId: UUID): Promise<TournamentEntry[]> {
-    const entries = await this.prisma.tournamentEntry.findMany({
+    const list = await this.prisma.tournamentEntry.findMany({
       where: { tournamentId },
     });
 
-    return entries as TournamentEntry[];
+    return list.map((stored) =>
+      TournamentEntry.create({
+        id: stored.id,
+        tournamentId: stored.tournamentId,
+        participantId: stored.participantId,
+        status: stored.status,
+        groupId: stored.groupId,
+        seed: stored.seed,
+        metadata: stored.metadata ?? {},
+      })
+    );
   }
 }

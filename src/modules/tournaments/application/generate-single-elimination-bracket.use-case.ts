@@ -3,40 +3,41 @@ import type { UUID } from "../../shared/types";
 import type { MatchRepository } from "../../matches/domain/match.repository";
 import type { TournamentEntryRepository } from "../domain/tournament-entry.repository";
 import type { TournamentRepository } from "../domain/tournament.repository";
+import type { ParticipantRepository } from "../../participants/domain/participant.repository";
+import type { TournamentEntry } from "../domain/tournament-entry";
 import { CreateMatchUseCase } from "../../matches/application/create-match.use-case";
-import { ParticipantRepository } from "../../participants/domain/participant.repository";
 
 export class GenerateSingleEliminationBracketUseCase {
-  private readonly createMatch: CreateMatchUseCase;
-
   constructor(
     private readonly tournaments: TournamentRepository,
     private readonly entries: TournamentEntryRepository,
     private readonly matches: MatchRepository,
     private readonly participants: ParticipantRepository,
-    private readonly ids: IdGenerator
-  ) {
-    this.createMatch = new CreateMatchUseCase(
-      this.matches,
-      this.tournaments,
-      this.participants,
-      this.ids
-    );
-  }
+    private readonly ids: IdGenerator,
+    private readonly createMatch: CreateMatchUseCase
+  ) { }
 
-  async execute(input: { tournamentId: UUID }): Promise<void> {
+  async execute(input: { tournamentId: UUID }) {
     const tournament = await this.ensureValidTournament(input.tournamentId);
+
     const confirmed = this.getSortedConfirmedParticipants(
       await this.entries.listByTournament(tournament.id)
     );
+
     this.ensureEnoughParticipants(confirmed);
     this.ensurePowerOfTwo(confirmed.length);
+
     const bracketOrder = this.generateBracketOrder(confirmed);
+
     const createdMatches = await this.createRoundOneMatches({
       tournamentId: tournament.id,
       participants: bracketOrder,
     });
-    console.log("Generated matches:", createdMatches);
+
+    return {
+      bracket: bracketOrder,
+      matches: createdMatches,
+    };
   }
 
   private async ensureValidTournament(tournamentId: UUID) {
@@ -50,13 +51,13 @@ export class GenerateSingleEliminationBracketUseCase {
     return tournament;
   }
 
-  private getSortedConfirmedParticipants(entries: any[]) {
+  private getSortedConfirmedParticipants(entries: TournamentEntry[]) {
     return entries
       .filter((e) => e.status === "CONFIRMED")
       .sort((a, b) => (a.seed ?? Infinity) - (b.seed ?? Infinity));
   }
 
-  private ensureEnoughParticipants(confirmed: any[]) {
+  private ensureEnoughParticipants(confirmed: TournamentEntry[]) {
     if (confirmed.length < 2) {
       throw new Error("Not enough participants to generate a bracket");
     }
@@ -65,12 +66,11 @@ export class GenerateSingleEliminationBracketUseCase {
   private ensurePowerOfTwo(n: number) {
     const isPowerOfTwo = (x: number) => (x & (x - 1)) === 0;
     if (!isPowerOfTwo(n)) {
-      // Próxima versión → integrar BYES
       throw new Error("Number of participants must be a power of two");
     }
   }
 
-  private generateBracketOrder<T extends { seed?: number }>(participants: T[]): T[] {
+  private generateBracketOrder(participants: TournamentEntry[]): TournamentEntry[] {
     const n = participants.length;
     const rounds = Math.log2(n);
 
@@ -84,10 +84,17 @@ export class GenerateSingleEliminationBracketUseCase {
       seeds = next;
     }
 
-    const order: T[] = [];
+    const order: TournamentEntry[] = [];
     for (const seed of seeds) {
-      order.push(participants[seed - 1]);
-      order.push(participants[n - seed]);
+      const p1 = participants[seed - 1];
+      const p2 = participants[n - seed];
+
+      if (!p1 || !p2) {
+        throw new Error("Invalid seeding order generated");
+      }
+
+      order.push(p1);
+      order.push(p2);
     }
 
     return order;
@@ -95,7 +102,7 @@ export class GenerateSingleEliminationBracketUseCase {
 
   private async createRoundOneMatches(params: {
     tournamentId: UUID;
-    participants: Array<{ participantId: UUID }>;
+    participants: TournamentEntry[];
   }) {
     const { tournamentId, participants } = params;
 
@@ -105,6 +112,10 @@ export class GenerateSingleEliminationBracketUseCase {
     for (let i = 0; i < total; i++) {
       const p1 = participants[i * 2];
       const p2 = participants[i * 2 + 1];
+
+      if (!p1 || !p2) {
+        throw new Error("Bracket generation mismatch: missing participant");
+      }
 
       const match = await this.createMatch.execute({
         tournamentId,
@@ -122,5 +133,3 @@ export class GenerateSingleEliminationBracketUseCase {
     return matches;
   }
 }
-
-
