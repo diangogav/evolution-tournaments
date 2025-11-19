@@ -2,7 +2,6 @@ import type { PlayerRepository } from "../../../domain/player.repository";
 import type { UUID } from "../../../../shared/types";
 import { Player } from "../../../domain/player";
 import { PrismaClient } from "@prisma/client";
-import { isJsonRecord } from "../../../../shared/isJsonObject";
 
 export class PrismaPlayerRepository implements PlayerRepository {
   constructor(private readonly prisma: PrismaClient) {}
