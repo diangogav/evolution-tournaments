@@ -8,4 +8,3 @@ export interface MatchRepository {
   update(match: Match): Promise<Match>;
   listByTournament(tournamentId: UUID): Promise<Match[]>;
 }
-

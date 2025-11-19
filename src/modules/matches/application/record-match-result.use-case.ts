@@ -1,28 +1,19 @@
-import type { UUID } from "../../shared/types";
+import type { UUID, MatchResult } from "../../shared/types";
 import type { MatchRepository } from "../domain/match.repository";
-import type { MatchResult } from "../../shared/types";
-import { TournamentRepository } from "../../tournaments/domain/tournament.repository";
+import type { TournamentRepository } from "../../tournaments/domain/tournament.repository";
+import type { IdGenerator } from "../../shared/ports";
+import type { ParticipantRepository } from "../../participants/domain/participant.repository";
+import type { Match } from "../domain/match";
 import { CreateMatchUseCase } from "./create-match.use-case";
-import { IdGenerator } from "../../shared/ports";
-import { Match } from "../domain/match";
-import { ParticipantRepository } from "../../participants/domain/participant.repository";
 
 export class RecordMatchResultUseCase {
-  private readonly createMatch: CreateMatchUseCase;
-
   constructor(
     private readonly matches: MatchRepository,
     private readonly tournaments: TournamentRepository,
     private readonly participants: ParticipantRepository,
-    private readonly ids: IdGenerator
-  ) {
-    this.createMatch = new CreateMatchUseCase(
-      this.matches,
-      this.tournaments,
-      this.participants,
-      this.ids
-    );
-  }
+    private readonly ids: IdGenerator,
+    private readonly createMatch: CreateMatchUseCase
+  ) { }
 
   async execute(input: {
     matchId: UUID;
@@ -30,9 +21,8 @@ export class RecordMatchResultUseCase {
       { participantId: UUID; score: number },
       { participantId: UUID; score: number }
     ];
-  }): Promise<void> {
+  }): Promise<Match> {
     const match = await this.matches.findById(input.matchId);
-
     if (!match) {
       throw new Error("Match not found");
     }
@@ -43,23 +33,14 @@ export class RecordMatchResultUseCase {
 
     const [p1, p2] = input.participants;
 
-    const matchParticipant1 = match.participants.find(
-      (p) => p.participantId === p1.participantId
-    );
-    const matchParticipant2 = match.participants.find(
-      (p) => p.participantId === p2.participantId
-    );
+    // Actualizar scores
+    match.updateParticipantScore(p1.participantId, p1.score);
+    match.updateParticipantScore(p2.participantId, p2.score);
 
-    if (!matchParticipant1 || !matchParticipant2) {
-      throw new Error("Participant not found in match");
-    }
-
-    matchParticipant1.score = p1.score;
-    matchParticipant2.score = p2.score;
-
+    // Determinar resultado
     let p1Result: MatchResult;
     let p2Result: MatchResult;
-    let winnerId: UUID | undefined;
+    let winnerId: UUID | null = null;
 
     if (p1.score > p2.score) {
       p1Result = "win";
@@ -74,16 +55,18 @@ export class RecordMatchResultUseCase {
       p2Result = "draw";
     }
 
-    matchParticipant1.result = p1Result;
-    matchParticipant2.result = p2Result;
+    match.setParticipantResult(p1.participantId, p1Result);
+    match.setParticipantResult(p2.participantId, p2Result);
 
-    match.completedAt = new Date().toISOString();
+    match.markCompleted(new Date().toISOString());
 
-    await this.matches.update(match);
+    const updated = await this.matches.update(match);
 
     if (winnerId) {
-      await this.advanceWinner(match, winnerId);
+      await this.advanceWinner(updated, winnerId);
     }
+
+    return updated;
   }
 
   private async advanceWinner(currentMatch: Match, winnerId: UUID) {
@@ -95,7 +78,7 @@ export class RecordMatchResultUseCase {
     }
 
     const partnerMatch = await this.findPartnerMatch(currentMatch);
-    if (!partnerMatch || !partnerMatch.completedAt) {
+    if (!partnerMatch || partnerMatch.completedAt == null) {
       return;
     }
 
@@ -106,7 +89,11 @@ export class RecordMatchResultUseCase {
       return;
     }
 
-    const currentPosition = currentMatch.metadata?.position as number;
+    const currentPosition = currentMatch.metadata?.position as number | undefined;
+    if (!currentPosition) {
+      return;
+    }
+
     const nextRoundPosition = Math.ceil(currentPosition / 2);
 
     await this.createMatch.execute({
@@ -125,7 +112,7 @@ export class RecordMatchResultUseCase {
   private async findPartnerMatch(
     currentMatch: Match
   ): Promise<Match | undefined> {
-    const currentPosition = currentMatch.metadata?.position as number;
+    const currentPosition = currentMatch.metadata?.position as number | undefined;
     if (!currentPosition) {
       return undefined;
     }
@@ -140,8 +127,7 @@ export class RecordMatchResultUseCase {
     return allMatches.find(
       (m) =>
         m.roundNumber === currentMatch.roundNumber &&
-        m.metadata?.position === partnerPosition
+        (m.metadata?.position as number | undefined) === partnerPosition
     );
   }
 }
-

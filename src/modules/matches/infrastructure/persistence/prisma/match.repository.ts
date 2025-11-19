@@ -1,80 +1,112 @@
 import type { Match } from "../../../domain/match";
+import { Match as MatchEntity } from "../../../domain/match";
+import type { MatchParticipant } from "../../../domain/match-participant";
 import type { MatchRepository } from "../../../domain/match.repository";
-import { PrismaClient } from "../../../../../generated/prisma";
-import { MatchParticipant } from "../../../domain/match-participant";
-import { UUID } from "../../../../shared/types";
+import type { UUID } from "../../../../shared/types";
+import { PrismaClient } from "@prisma/client";
 
 export class PrismaMatchRepository implements MatchRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaClient) { }
+
+  private mapRowToDomain(row: any): Match {
+    const raw = row.participants;
+
+    if (!Array.isArray(raw) || raw.length !== 2) {
+      throw new Error("Invalid participants payload for Match");
+    }
+
+    const participants: [MatchParticipant, MatchParticipant] = [
+      {
+        participantId: raw[0].participantId,
+        score: raw[0].score ?? null,
+        result: raw[0].result ?? null,
+        lineup: raw[0].lineup,
+      },
+      {
+        participantId: raw[1].participantId,
+        score: raw[1].score ?? null,
+        result: raw[1].result ?? null,
+        lineup: raw[1].lineup,
+      },
+    ];
+
+    return MatchEntity.create({
+      id: row.id,
+      tournamentId: row.tournamentId,
+      roundNumber: row.roundNumber,
+      stage: row.stage,
+      bestOf: row.bestOf,
+      scheduledAt: row.scheduledAt,
+      completedAt: row.completedAt,
+      format: row.format,
+      participants,
+      metadata: row.metadata ?? {},
+    });
+  }
 
   async create(match: Match): Promise<Match> {
-    const newMatch = await this.prisma.match.create({
+    const data = match.toPrimitives();
+
+    const stored = await this.prisma.match.create({
       data: {
-        id: match.id,
-        tournamentId: match.tournamentId,
-        roundNumber: match.roundNumber,
-        stage: match.stage,
-        bestOf: match.bestOf,
-        scheduledAt: match.scheduledAt,
-        completedAt: match.completedAt,
-        format: match.format,
-        participants: match.participants as any,
-        metadata: match.metadata,
+        id: data.id,
+        tournamentId: data.tournamentId,
+        roundNumber: data.roundNumber,
+        stage: data.stage,
+        bestOf: data.bestOf,
+        scheduledAt: data.scheduledAt,
+        completedAt: data.completedAt,
+        format: data.format,
+        participants: JSON.parse(JSON.stringify(data.participants)),
+        metadata: JSON.parse(JSON.stringify(data.metadata)),
       },
     });
 
-    return {
-      ...newMatch,
-      participants: newMatch.participants as [MatchParticipant, MatchParticipant],
-    };
+    return this.mapRowToDomain(stored);
   }
 
   async list(): Promise<Match[]> {
-    const matches = await this.prisma.match.findMany();
-    return matches.map((m) => ({
-      ...m,
-      participants: m.participants as [MatchParticipant, MatchParticipant],
-    }));
+    const rows = await this.prisma.match.findMany();
+    return rows.map((row) => this.mapRowToDomain(row));
   }
 
-  async findById(id: UUID): Promise<Match | undefined> {
-    const match = await this.prisma.match.findUnique({
+  async findById(id: UUID): Promise<Match | null> {
+    const row = await this.prisma.match.findUnique({
       where: { id },
     });
 
-    if (!match) {
-      return undefined;
+    if (!row) {
+      return null;
     }
 
-    return {
-      ...match,
-      participants: match.participants as [MatchParticipant, MatchParticipant],
-    };
+    return this.mapRowToDomain(row);
   }
 
   async update(match: Match): Promise<Match> {
-    const updatedMatch = await this.prisma.match.update({
-      where: { id: match.id },
+    const data = match.toPrimitives();
+
+    const stored = await this.prisma.match.update({
+      where: { id: data.id },
       data: {
-        completedAt: match.completedAt,
-        participants: match.participants as any,
+        roundNumber: data.roundNumber,
+        stage: data.stage,
+        bestOf: data.bestOf,
+        scheduledAt: data.scheduledAt,
+        completedAt: data.completedAt,
+        format: data.format,
+        participants: JSON.parse(JSON.stringify(data.participants)),
+        metadata: JSON.parse(JSON.stringify(data.metadata)),
       },
     });
 
-    return {
-      ...updatedMatch,
-      participants: updatedMatch.participants as [MatchParticipant, MatchParticipant],
-    };
+    return this.mapRowToDomain(stored);
   }
 
   async listByTournament(tournamentId: UUID): Promise<Match[]> {
-    const matches = await this.prisma.match.findMany({
+    const rows = await this.prisma.match.findMany({
       where: { tournamentId },
     });
 
-    return matches.map((m) => ({
-      ...m,
-      participants: m.participants as [MatchParticipant, MatchParticipant],
-    }));
+    return rows.map((row) => this.mapRowToDomain(row));
   }
 }
