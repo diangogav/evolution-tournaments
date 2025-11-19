@@ -107,10 +107,10 @@ export const registerRoutes = (
         .get("/", () => repositories.participants.list())
         .post(
           "/",
-          ({ body, set }) => {
-            const participant = useCases.createParticipant.execute(body);
+          async ({ body, set }) => {
+            const participant = await useCases.createParticipant.execute(body);
             set.status = 201;
-            return participant;
+            return participant.toPrimitives();
           },
           { body: CreateParticipantBody }
         )

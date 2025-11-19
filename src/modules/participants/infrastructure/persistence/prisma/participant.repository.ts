@@ -1,54 +1,66 @@
-import type { Participant } from "../../../domain/participant";
+import { Participant } from "../../../domain/participant";
 import type { ParticipantRepository } from "../../../domain/participant.repository";
-import { PrismaClient, Participant as PrismaParticipant } from "../../../../../generated/prisma";
 import type { UUID } from "../../../../shared/types";
+import { PrismaClient } from "@prisma/client";
 
 export class PrismaParticipantRepository implements ParticipantRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
   async create(participant: Participant): Promise<Participant> {
-    const newParticipant = await this.prisma.participant.create({
+    const data = participant.toPrimitives();
+
+    const stored = await this.prisma.participant.create({
       data: {
-        id: participant.id,
-        type: participant.type,
-        displayName: participant.displayName,
-        countryCode: participant.countryCode,
-        seeding: participant.seeding,
-        metadata: participant.metadata,
-        player: participant.type === 'PLAYER' ? { connect: { id: participant.referenceId } } : undefined,
-        team: participant.type === 'TEAM' ? { connect: { id: participant.referenceId } } : undefined,
+        id: data.id,
+        type: data.type,
+        displayName: data.displayName,
+        countryCode: data.countryCode,
+        seeding: data.seeding,
+        metadata: JSON.parse(JSON.stringify(data.metadata)),
+        playerId: data.type === "PLAYER" ? data.referenceId : undefined,
+        teamId: data.type === "TEAM" ? data.referenceId : undefined,
       },
     });
 
-    return this.mapToDomain(newParticipant);
+    return Participant.create({
+      id: stored.id,
+      type: stored.type,
+      displayName: stored.displayName,
+      countryCode: stored.countryCode,
+      seeding: stored.seeding,
+      referenceId: stored.playerId ?? stored.teamId!,
+      metadata: stored.metadata ?? {},
+    });
   }
 
   async list(): Promise<Participant[]> {
-    const participants = await this.prisma.participant.findMany();
-    return participants.map(this.mapToDomain);
+    const list = await this.prisma.participant.findMany();
+
+    return list.map((stored) =>
+      Participant.create({
+        id: stored.id,
+        type: stored.type,
+        displayName: stored.displayName,
+        countryCode: stored.countryCode,
+        seeding: stored.seeding,
+        referenceId: stored.playerId ?? stored.teamId!,
+        metadata: stored.metadata ?? {},
+      })
+    );
   }
 
   async findById(id: UUID): Promise<Participant | null> {
-    const participant = await this.prisma.participant.findUnique({
-      where: { id },
+    const stored = await this.prisma.participant.findUnique({ where: { id } });
+    if (!stored) return null;
+
+    return Participant.create({
+      id: stored.id,
+      type: stored.type,
+      displayName: stored.displayName,
+      countryCode: stored.countryCode,
+      seeding: stored.seeding,
+      referenceId: stored.playerId ?? stored.teamId!,
+      metadata: stored.metadata ?? {},
     });
-
-    if (!participant) {
-      return null;
-    }
-
-    return this.mapToDomain(participant);
-  }
-
-  private mapToDomain(participant: PrismaParticipant): Participant {
-    return {
-      id: participant.id,
-      type: participant.type,
-      displayName: participant.displayName,
-      countryCode: participant.countryCode,
-      seeding: participant.seeding,
-      metadata: participant.metadata as ({} | undefined),
-      referenceId: participant.playerId || participant.teamId || '',
-    };
   }
 }

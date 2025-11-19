@@ -3,7 +3,7 @@ content-type: application/json
 
 {
   "type": "PLAYER",
-  "referenceId": "d10a5ec1-6479-4226-bc16-1d546665f481",
+  "referenceId": "03a22271-bb0b-49b9-b5b5-0237d70a5851",
   "displayName": "Yugi Muto"
 }
 

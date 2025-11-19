@@ -1,9 +1,10 @@
-import type { IdGenerator } from "../../shared/ports";
-import type { ParticipantType, UUID } from "../../shared/types";
-import type { PlayerRepository } from "../../players/domain/player.repository";
-import type { TeamRepository } from "../../teams/domain/team.repository";
-import type { Participant } from "../domain/participant";
-import type { ParticipantRepository } from "../domain/participant.repository";
+import { ParticipantType } from "@prisma/client";
+import { PlayerRepository } from "../../players/domain/player.repository";
+import { IdGenerator } from "../../shared/ports";
+import { TeamRepository } from "../../teams/domain/team.repository";
+import { Participant } from "../domain/participant";
+import { ParticipantRepository } from "../domain/participant.repository";
+import { UUID } from "../../shared/types";
 
 export class CreateParticipantUseCase {
   constructor(
@@ -20,21 +21,28 @@ export class CreateParticipantUseCase {
     countryCode?: string;
     seeding?: number;
     metadata?: Record<string, unknown>;
-  }): Promise<Participant> {
-    if (input.type === "PLAYER" && !this.players.findById(input.referenceId)) {
-      throw new Error("Player reference not found");
+  }) {
+    // reference validation
+    if (input.type === "PLAYER") {
+      const player = await this.players.findById(input.referenceId);
+      if (!player) throw new Error("Player reference not found");
     }
 
-    if (input.type === "TEAM" && !this.teams.findById(input.referenceId)) {
-      throw new Error("Team reference not found");
+    if (input.type === "TEAM") {
+      const team = await this.teams.findById(input.referenceId);
+      if (!team) throw new Error("Team reference not found");
     }
 
-    const participant: Participant = {
+    const participant = Participant.create({
       id: this.ids.generate(),
-      ...input,
-    };
+      type: input.type,
+      referenceId: input.referenceId,
+      displayName: input.displayName,
+      countryCode: input.countryCode ?? null,
+      seeding: input.seeding ?? null,
+      metadata: input.metadata ?? {},
+    });
 
     return this.participants.create(participant);
   }
 }
-
