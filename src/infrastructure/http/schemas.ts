@@ -89,7 +89,6 @@ export const CreateTournamentBody = t.Object({
 });
 
 export const CreateTournamentEntryBody = t.Object({
-  tournamentId: IdentifierSchema,
   participantId: IdentifierSchema,
   status: t.Optional(TournamentEntryStatusSchema),
   groupId: t.Optional(IdentifierSchema),
@@ -117,6 +116,13 @@ export const CreateMatchBody = t.Object({
   bestOf: t.Optional(t.Number({ minimum: 1 })),
   scheduledAt: t.Optional(t.String({ format: "date-time" })),
   metadata: t.Optional(t.Record(t.String(), t.Unknown())),
+  participants: t.Array(
+    t.Object({
+      participantId: IdentifierSchema,
+      score: t.Number({ minimum: 0 }),
+    }),
+    { minItems: 2, maxItems: 2 }
+  ),
 });
 
 export const RecordMatchResultBody = t.Object({

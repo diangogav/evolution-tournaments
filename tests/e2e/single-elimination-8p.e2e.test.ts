@@ -60,10 +60,9 @@ describe("🏆 E2E Tournament Flow — 8 Participants", () => {
 
     test("4. Register 8 entries", async () => {
         for (const pid of participantIds) {
-            const response = await api["tournaments"]["entries"].post({
+            const response = await api["tournaments"][tournamentId]["entries"].post({
                 participantId: pid,
                 status: "CONFIRMED",
-                tournamentId,
             });
 
             expect(response.error).toBeNull();
@@ -74,13 +73,13 @@ describe("🏆 E2E Tournament Flow — 8 Participants", () => {
     });
 
     test("5. Generate bracket", async () => {
-        const response = await api.tournaments[tournamentId]["generate-bracket"].post();
+        const response = await api.tournaments[tournamentId]["bracket"]["generate"].post();
 
         expect(response.error).toBeNull();
     });
 
     test("6. Fetch Round 1 matches", async () => {
-        const response = await api.matches["tournaments"][tournamentId].get();
+        const response = await api.tournaments[tournamentId]["matches"].get();
 
         expect(response.error).toBeNull();
         const matches = response.data;
@@ -96,15 +95,15 @@ describe("🏆 E2E Tournament Flow — 8 Participants", () => {
     });
 
     test("7. Submit results for Round 1", async () => {
-        const matchesResponse = await api.matches["tournaments"][tournamentId].get();
+        const response = await api.tournaments[tournamentId]["matches"].get();
 
-        const matches = matchesResponse.data;
+        const matches = response.data;
 
         for (const match of matches) {
             const p1 = match.participants[0].participantId;
             const p2 = match.participants[1].participantId;
 
-            const response = await api.matches[match.id].result.post({
+            const response = await api.tournaments[tournamentId]["matches"][match.id]["result"].post({
                 participants: [
                     { participantId: p1, score: 1 },
                     { participantId: p2, score: 0 },
@@ -116,7 +115,7 @@ describe("🏆 E2E Tournament Flow — 8 Participants", () => {
     });
 
     test("8. Fetch Round 2 matches", async () => {
-        const response = await api.matches["tournaments"][tournamentId].get();
+        const response = await api.tournaments[tournamentId]["matches"].get();
 
         const matchesR2 = response.data.filter((m: any) => m.roundNumber === 2);
 
@@ -125,25 +124,25 @@ describe("🏆 E2E Tournament Flow — 8 Participants", () => {
     });
 
     test("9. Submit results for Round 2", async () => {
-        const response = await api.matches["tournaments"][tournamentId].get();
+        const response = await api.tournaments[tournamentId]["matches"].get();
         const matchesR2 = response.data.filter((m: any) => m.roundNumber === 2);
 
         for (const match of matchesR2) {
             const win1 = match.participants[0].participantId;
 
-            const result = await api.matches[match.id].result.post({
+            const response = await api.tournaments[tournamentId]["matches"][match.id]["result"].post({
                 participants: [
                     { participantId: win1, score: 2 },
                     { participantId: match.participants[1].participantId, score: 1 },
                 ],
             });
 
-            expect(result.error).toBeNull();
+            expect(response.error).toBeNull();
         }
     });
 
     test("10. Fetch Final (Round 3)", async () => {
-        const response = await api.matches["tournaments"][tournamentId].get();
+        const response = await api.tournaments[tournamentId]["matches"].get();
         const finalMatch = response.data.find((m: any) => m.roundNumber === 3);
 
         expect(finalMatch).toBeDefined();
@@ -151,12 +150,12 @@ describe("🏆 E2E Tournament Flow — 8 Participants", () => {
     });
 
     test("11. Submit Final result", async () => {
-        const response = await api.matches["tournaments"][tournamentId].get();
+        const response = await api.tournaments[tournamentId]["matches"].get();
         const finalMatch = response.data.find((m: any) => m.roundNumber === 3);
 
         const winner = finalMatch.participants[0].participantId;
 
-        const result = await api.matches[finalMatch.id].result.post({
+        const result = await api.tournaments[tournamentId]["matches"][finalMatch.id]["result"].post({
             participants: [
                 { participantId: winner, score: 3 },
                 { participantId: finalMatch.participants[1].participantId, score: 1 },
