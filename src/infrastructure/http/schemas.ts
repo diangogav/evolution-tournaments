@@ -85,6 +85,7 @@ export const CreateTournamentBody = t.Object({
   startAt: t.Optional(t.String({ format: "date-time" })),
   endAt: t.Optional(t.String({ format: "date-time" })),
   location: t.Optional(t.String()),
+  webhookUrl: t.Optional(t.String()),
   metadata: t.Optional(t.Record(t.String(), t.Unknown())),
 });
 

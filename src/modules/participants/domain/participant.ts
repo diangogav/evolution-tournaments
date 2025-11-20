@@ -33,6 +33,7 @@ export class Participant implements Identified {
   get type() { return this.props.type; }
   get referenceId() { return this.props.referenceId; }
   get displayName() { return this.props.displayName; }
+  get metadata() { return this.props.metadata; }
 
   toPrimitives() { return { ...this.props }; }
 }

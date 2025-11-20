@@ -78,7 +78,26 @@ export class RecordMatchResultUseCase {
     );
 
     const partnerMatch = await this.findPartnerMatch(currentMatch, allMatches);
-    if (!partnerMatch || !partnerMatch.completedAt) return;
+
+    // If there is no partner match, it means this was the final match
+    if (!partnerMatch) {
+      // Double check if it's the final by checking if there are any matches in the next round
+      // For single elimination, the final match has the highest round number
+      const maxRound = Math.max(...allMatches.map(m => m.roundNumber));
+      if (currentMatch.roundNumber === maxRound) {
+        // This is the final match!\
+        if (tournament.webhookUrl && winnerId) {
+          this.triggerWebhook(tournament.webhookUrl, {
+            tournamentId: tournament.id,
+            winnerId, // Send participantId directly
+            completedAt: new Date().toISOString(),
+          });
+        }
+      }
+      return;
+    }
+
+    if (!partnerMatch.completedAt) return;
 
     const partnerWinner = partnerMatch.participants.find(
       (p) => p.result === "win"
@@ -134,6 +153,25 @@ export class RecordMatchResultUseCase {
         position: nextPosition,
       },
     });
+  }
+
+  private async triggerWebhook(url: string, data: unknown) {
+    console.log(`[Webhook] Triggering webhook to ${url}`, data);
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      console.log(`[Webhook] Response status: ${response.status}`);
+      if (!response.ok) {
+        const text = await response.text();
+        console.error(`[Webhook] Failed response: ${text}`);
+      }
+    } catch (error) {
+      console.error("Failed to trigger webhook:", error);
+      // Don't re-throw - webhook failures should not block match result recording
+    }
   }
 
   private async findPartnerMatch(

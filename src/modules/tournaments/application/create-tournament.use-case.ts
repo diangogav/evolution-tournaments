@@ -25,6 +25,7 @@ export class CreateTournamentUseCase {
     startAt?: string;
     endAt?: string;
     location?: string;
+    webhookUrl?: string;
     metadata?: Record<string, unknown>;
   }): Promise<Tournament> {
     const tournament = Tournament.create({
@@ -40,6 +41,7 @@ export class CreateTournamentUseCase {
       startAt: input.startAt ?? null,
       endAt: input.endAt ?? null,
       location: input.location ?? null,
+      webhookUrl: input.webhookUrl ?? null,
       metadata: input.metadata ?? {},
     });
 

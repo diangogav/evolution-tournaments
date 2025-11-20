@@ -17,11 +17,12 @@ export interface TournamentProps extends Identified {
   startAt?: string | null;
   endAt?: string | null;
   location?: string | null;
+  webhookUrl?: string | null;
   metadata: unknown;
 }
 
 export class Tournament implements Identified {
-  private constructor(private props: TournamentProps) {}
+  private constructor(private props: TournamentProps) { }
 
   static create(props: TournamentProps): Tournament {
     if (!props.name || props.name.trim().length === 0) {
@@ -41,9 +42,9 @@ export class Tournament implements Identified {
     if (props.startAt && props.endAt && props.startAt > props.endAt) {
       throw new Error("Tournament.startAt must be before endAt");
     }
-
     return new Tournament({
       ...props,
+      webhookUrl: props.webhookUrl ?? null,
       metadata: props.metadata ?? {},
     });
   }
@@ -54,6 +55,7 @@ export class Tournament implements Identified {
   get allowMixedParticipants() { return this.props.allowMixedParticipants; }
   get participantType() { return this.props.participantType; }
   get maxParticipants() { return this.props.maxParticipants ?? null; }
+  get webhookUrl() { return this.props.webhookUrl; }
 
   toPrimitives() {
     return { ...this.props };

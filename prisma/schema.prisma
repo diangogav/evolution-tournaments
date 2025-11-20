@@ -106,6 +106,7 @@ model Tournament {
   startAt                String?
   endAt                  String?
   location               String?
+  webhookUrl             String?
   metadata               Json?
 
   entries TournamentEntry[]

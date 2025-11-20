@@ -24,6 +24,7 @@ export class PrismaTournamentRepository implements TournamentRepository {
         startAt: data.startAt,
         endAt: data.endAt,
         location: data.location,
+        webhookUrl: data.webhookUrl,
         metadata: JSON.parse(JSON.stringify(data.metadata)),
       },
     });
@@ -41,6 +42,7 @@ export class PrismaTournamentRepository implements TournamentRepository {
       startAt: stored.startAt,
       endAt: stored.endAt,
       location: stored.location,
+      webhookUrl: stored.webhookUrl,
       metadata: stored.metadata ?? {},
     });
   }
@@ -62,6 +64,7 @@ export class PrismaTournamentRepository implements TournamentRepository {
         startAt: stored.startAt,
         endAt: stored.endAt,
         location: stored.location,
+        webhookUrl: stored.webhookUrl,
         metadata: stored.metadata ?? {},
       })
     );
@@ -84,6 +87,7 @@ export class PrismaTournamentRepository implements TournamentRepository {
       startAt: stored.startAt,
       endAt: stored.endAt,
       location: stored.location,
+      webhookUrl: stored.webhookUrl,
       metadata: stored.metadata ?? {},
     });
   }
