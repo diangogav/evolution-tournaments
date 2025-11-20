@@ -1,10 +1,10 @@
 import type { UUID, MatchResult } from "../../shared/types";
 import type { MatchRepository } from "../domain/match.repository";
 import type { TournamentRepository } from "../../tournaments/domain/tournament.repository";
-import type { ParticipantRepository } from "../../participants/domain/participant.repository";
 import type { IdGenerator } from "../../shared/ports";
+import type { ParticipantRepository } from "../../participants/domain/participant.repository";
+import type { Match } from "../domain/match";
 import { CreateMatchUseCase } from "./create-match.use-case";
-import { Match } from "../domain/match";
 
 export class RecordMatchResultUseCase {
   constructor(
@@ -12,7 +12,7 @@ export class RecordMatchResultUseCase {
     private readonly tournaments: TournamentRepository,
     private readonly participants: ParticipantRepository,
     private readonly ids: IdGenerator,
-    private readonly createMatch: CreateMatchUseCase,
+    private readonly createMatch: CreateMatchUseCase
   ) { }
 
   async execute(input: {
@@ -24,106 +24,132 @@ export class RecordMatchResultUseCase {
   }): Promise<Match> {
     const match = await this.matches.findById(input.matchId);
     if (!match) throw new Error("Match not found");
-    if (match.completedAt) throw new Error("Match already completed");
+
+    if (match.completedAt) {
+      throw new Error("Match already completed");
+    }
 
     const [p1, p2] = input.participants;
 
-    // --- Domain logic ---
-    const updated = this.buildUpdatedMatch(match, p1, p2);
+    match.updateParticipantScore(p1.participantId, p1.score);
+    match.updateParticipantScore(p2.participantId, p2.score);
 
-    // Persist updated match
-    const stored = await this.matches.update(updated);
+    let p1Result: MatchResult;
+    let p2Result: MatchResult;
+    let winnerId: UUID | null = null;
 
-    if (stored.metadata.position) {
-      await this.advanceWinner(stored);
+    if (p1.score > p2.score) {
+      p1Result = "win";
+      p2Result = "loss";
+      winnerId = p1.participantId;
+    } else if (p2.score > p1.score) {
+      p1Result = "loss";
+      p2Result = "win";
+      winnerId = p2.participantId;
+    } else {
+      p1Result = "draw";
+      p2Result = "draw";
     }
 
-    return stored;
+    match.setParticipantResult(p1.participantId, p1Result);
+    match.setParticipantResult(p2.participantId, p2Result);
+
+    match.markCompleted(new Date().toISOString());
+
+    const updated = await this.matches.update(match);
+
+    if (winnerId) {
+      await this.advanceWinner(updated, winnerId);
+    }
+
+    return updated;
   }
 
-  private buildUpdatedMatch(
-    match: Match,
-    p1: { participantId: UUID; score: number },
-    p2: { participantId: UUID; score: number }
-  ): Match {
-    const now = new Date().toISOString();
+  private async advanceWinner(currentMatch: Match, winnerId: UUID) {
+    const tournament = await this.tournaments.findById(
+      currentMatch.tournamentId
+    );
+    if (tournament?.format !== "SINGLE_ELIMINATION") {
+      return;
+    }
 
-    const winner =
-      p1.score > p2.score ? p1.participantId :
-        p2.score > p1.score ? p2.participantId :
-          null;
-
-    return Match.create({
-      ...match.toPrimitives(),
-      participants: [
-        {
-          participantId: p1.participantId,
-          score: p1.score,
-          result: winner === p1.participantId ? "win" : winner ? "loss" : "draw"
-        },
-        {
-          participantId: p2.participantId,
-          score: p2.score,
-          result: winner === p2.participantId ? "win" : winner ? "loss" : "draw"
-        }
-      ],
-      completedAt: now
-    });
-  }
-
-  private async advanceWinner(match: Match) {
-    const winner = match.participants.find(p => p.result === "win");
-    if (!winner) return;
-
-    const tournament = await this.tournaments.findById(match.tournamentId);
-    if (tournament?.format !== "SINGLE_ELIMINATION") return;
-
-    const all = await this.matches.listByTournament(match.tournamentId);
-    const partner = await this.findPartnerMatch(all, match);
-    if (!partner || !partner.completedAt) return;
-
-    const partnerWinner = partner.participants.find(p => p.result === "win");
-    if (!partnerWinner) return;
-
-    const nextRound = match.roundNumber + 1;
-    const position = match.metadata.position as number;
-    const nextPosition = Math.ceil(position / 2);
-
-    const existing = all.find(
-      m => m.roundNumber === nextRound &&
-        m.metadata.position === nextPosition
+    const allMatches = await this.matches.listByTournament(
+      currentMatch.tournamentId
     );
 
-    const participants = [
-      { participantId: winner.participantId, score: null, result: null },
-      { participantId: partnerWinner.participantId, score: null, result: null }
-    ];
+    const partnerMatch = await this.findPartnerMatch(currentMatch, allMatches);
+    if (!partnerMatch || !partnerMatch.completedAt) return;
 
-    if (existing) {
-      const updated = Match.create({
-        ...existing.toPrimitives(),
-        participants
-      });
-      await this.matches.update(updated);
+    const partnerWinner = partnerMatch.participants.find(
+      (p) => p.result === "win"
+    );
+    if (!partnerWinner) return;
+
+    const currentPosition = currentMatch.metadata?.position as number | undefined;
+    if (!currentPosition) return;
+
+    const nextRound = currentMatch.roundNumber + 1;
+    const nextPosition = Math.ceil(currentPosition / 2);
+
+    const existingNextMatch = allMatches.find(
+      (m) =>
+        m.roundNumber === nextRound &&
+        (m.metadata?.position as number | undefined) === nextPosition
+    );
+
+    if (existingNextMatch) {
+      const updatedNextMatch = existingNextMatch.withParticipants([
+        {
+          participantId: winnerId,
+          score: null,
+          result: null,
+        },
+        {
+          participantId: partnerWinner.participantId,
+          score: null,
+          result: null,
+        },
+      ]);
+
+      await this.matches.update(updatedNextMatch);
       return;
     }
 
     await this.createMatch.execute({
-      tournamentId: match.tournamentId,
+      tournamentId: currentMatch.tournamentId,
       roundNumber: nextRound,
-      participants,
-      metadata: { position: nextPosition }
+      participants: [
+        {
+          participantId: winnerId,
+          score: null,
+          result: null,
+        },
+        {
+          participantId: partnerWinner.participantId,
+          score: null,
+          result: null,
+        },
+      ],
+      metadata: {
+        position: nextPosition,
+      },
     });
   }
 
-  private findPartnerMatch(all: Match[], current: Match): Match | undefined {
-    const position = current.metadata.position as number;
-    const partnerPos = position % 2 === 0 ? position - 1 : position + 1;
+  private async findPartnerMatch(
+    currentMatch: Match,
+    allMatches: Match[]
+  ): Promise<Match | undefined> {
+    const currentPosition = currentMatch.metadata?.position as number | undefined;
+    if (!currentPosition) return undefined;
 
-    return all.find(
-      m =>
-        m.roundNumber === current.roundNumber &&
-        m.metadata.position === partnerPos
+    const partnerPosition =
+      currentPosition % 2 === 0 ? currentPosition - 1 : currentPosition + 1;
+
+    return allMatches.find(
+      (m) =>
+        m.roundNumber === currentMatch.roundNumber &&
+        (m.metadata?.position as number | undefined) === partnerPosition
     );
   }
 }

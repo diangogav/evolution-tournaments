@@ -4,6 +4,7 @@ import type { ParticipantRepository } from "../../participants/domain/participan
 import type { TournamentRepository } from "../../tournaments/domain/tournament.repository";
 import { Match } from "../domain/match";
 import type { MatchRepository } from "../domain/match.repository";
+import { MatchParticipant } from "../domain/match-participant";
 
 export class CreateMatchUseCase {
   constructor(
@@ -19,7 +20,7 @@ export class CreateMatchUseCase {
     stage?: string;
     bestOf?: number;
     scheduledAt?: string;
-    participants: { participantId: UUID }[];
+    participants: MatchParticipant[];
     metadata?: Record<string, unknown>;
   }): Promise<Match> {
     const tournament = await this.tournaments.findById(input.tournamentId);

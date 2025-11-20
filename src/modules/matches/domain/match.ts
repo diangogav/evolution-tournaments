@@ -13,7 +13,7 @@ export interface MatchProps extends Identified {
   scheduledAt: string | null;
   completedAt: string | null;
   format: TournamentFormat | null;
-  participants: MatchParticipant[];
+  participants: [MatchParticipant, MatchParticipant];
   metadata: Record<string, unknown>;
 }
 
@@ -70,33 +70,13 @@ export class Match implements Identified {
     return new Match(normalized);
   }
 
-  get id() {
-    return this.props.id;
-  }
-
-  get tournamentId() {
-    return this.props.tournamentId;
-  }
-
-  get roundNumber() {
-    return this.props.roundNumber;
-  }
-
-  get format() {
-    return this.props.format;
-  }
-
-  get participants(): MatchParticipant[] {
-    return this.props.participants;
-  }
-
-  get completedAt() {
-    return this.props.completedAt;
-  }
-
-  get metadata() {
-    return this.props.metadata;
-  }
+  get id() { return this.props.id; }
+  get tournamentId() { return this.props.tournamentId; }
+  get roundNumber() { return this.props.roundNumber; }
+  get format() { return this.props.format; }
+  get participants(): [MatchParticipant, MatchParticipant] { return this.props.participants; }
+  get completedAt() { return this.props.completedAt; }
+  get metadata() { return this.props.metadata; }
 
   markCompleted(timestamp: string) {
     if (this.props.completedAt) {
@@ -131,6 +111,13 @@ export class Match implements Identified {
     }
 
     participant.result = result as any;
+  }
+
+  withParticipants(participants: [MatchParticipant, MatchParticipant]): Match {
+    return Match.create({
+      ...this.toPrimitives(),
+      participants,
+    });
   }
 
   toPrimitives(): MatchProps {
