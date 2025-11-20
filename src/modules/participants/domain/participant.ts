@@ -10,7 +10,7 @@ export interface ParticipantProps extends Identified {
 }
 
 export class Participant implements Identified {
-  private constructor(private props: ParticipantProps) {}
+  private constructor(private props: ParticipantProps) { }
 
   static create(props: ParticipantProps): Participant {
     if (!props.displayName || props.displayName.trim().length === 0) {
@@ -32,6 +32,7 @@ export class Participant implements Identified {
   get id() { return this.props.id; }
   get type() { return this.props.type; }
   get referenceId() { return this.props.referenceId; }
+  get displayName() { return this.props.displayName; }
 
   toPrimitives() { return { ...this.props }; }
 }
