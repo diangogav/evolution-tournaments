@@ -42,9 +42,9 @@ export class CreateMatchUseCase {
       this.participants.findById(p2.participantId),
     ]);
 
-    if (!participant1 || !participant2) {
-      throw new Error("One or more participants do not exist");
-    }
+    // if (!participant1 || !participant2) {
+    //   throw new Error("One or more participants do not exist");
+    // }
 
     const match = Match.create({
       id: this.ids.generate(),

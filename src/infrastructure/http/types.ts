@@ -17,6 +17,8 @@ import { GenerateSingleEliminationBracketUseCase } from "../../modules/tournamen
 import { RegisterTournamentEntryUseCase } from "../../modules/tournaments/application/register-tournament-entry.use-case";
 import { TournamentEntryRepository } from "../../modules/tournaments/domain/tournament-entry.repository";
 import { TournamentRepository } from "../../modules/tournaments/domain/tournament.repository";
+import { GenerateFullBracketUseCase } from "../../modules/tournaments/application/generate-full-bracket.use-case";
+import { BracketViewUseCase } from "../../modules/tournaments/application/view-bracket.use-case";
 
 export type HttpDependencies = {
     useCases: {
@@ -31,6 +33,8 @@ export type HttpDependencies = {
         listMatchesByTournament: ListMatchesByTournamentUseCase;
         generateSingleEliminationBracket: GenerateSingleEliminationBracketUseCase;
         recordMatchResult: RecordMatchResultUseCase;
+        generateFullBracket: GenerateFullBracketUseCase;
+        bracketView: BracketViewUseCase;
     };
     repositories: {
         players: PlayerRepository;

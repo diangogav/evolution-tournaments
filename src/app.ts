@@ -29,6 +29,8 @@ import { CreateMatchUseCase } from "./modules/matches/application/create-match.u
 import { RecordMatchResultUseCase } from "./modules/matches/application/record-match-result.use-case";
 import { GenerateSingleEliminationBracketUseCase } from "./modules/tournaments/application/generate-single-elimination-bracket.use-case";
 import { ListMatchesByTournamentUseCase } from "./modules/matches/application/list-matches-by-tournament.use-case";
+import { GenerateFullBracketUseCase } from "./modules/tournaments/application/generate-full-bracket.use-case";
+import { BracketViewUseCase } from "./modules/tournaments/application/view-bracket.use-case";
 
 export const buildApp = async (externalPrisma?: PrismaClient) => {
   const prisma = externalPrisma ?? new PrismaClient();
@@ -111,6 +113,19 @@ export const buildApp = async (externalPrisma?: PrismaClient) => {
       repositories.participants,
       idGenerator,
       createMatch,
+    ),
+    generateFullBracket: new GenerateFullBracketUseCase(
+      repositories.tournaments,
+      repositories.entries,
+      repositories.matches,
+      repositories.participants,
+      idGenerator,
+      createMatch,
+    ),
+    bracketView: new BracketViewUseCase(
+      repositories.tournaments,
+      repositories.matches,
+      repositories.participants,
     ),
   } as const;
 
