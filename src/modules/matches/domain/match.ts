@@ -13,7 +13,7 @@ export interface MatchProps extends Identified {
   scheduledAt: string | null;
   completedAt: string | null;
   format: TournamentFormat | null;
-  participants: [MatchParticipant, MatchParticipant];
+  participants: MatchParticipant[];
   metadata: Record<string, unknown>;
 }
 
@@ -86,7 +86,7 @@ export class Match implements Identified {
     return this.props.format;
   }
 
-  get participants(): [MatchParticipant, MatchParticipant] {
+  get participants(): MatchParticipant[] {
     return this.props.participants;
   }
 

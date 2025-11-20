@@ -19,10 +19,7 @@ export class CreateMatchUseCase {
     stage?: string;
     bestOf?: number;
     scheduledAt?: string;
-    participants: [
-      { participantId: UUID },
-      { participantId: UUID }
-    ];
+    participants: { participantId: UUID }[];
     metadata?: Record<string, unknown>;
   }): Promise<Match> {
     const tournament = await this.tournaments.findById(input.tournamentId);
