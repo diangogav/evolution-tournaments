@@ -19,6 +19,14 @@ import { TournamentEntryRepository } from "../../modules/tournaments/domain/tour
 import { TournamentRepository } from "../../modules/tournaments/domain/tournament.repository";
 import { GenerateFullBracketUseCase } from "../../modules/tournaments/application/generate-full-bracket.use-case";
 import { BracketViewUseCase } from "../../modules/tournaments/application/view-bracket.use-case";
+import { WithdrawTournamentEntry } from "../../modules/tournaments/application/withdraw-tournament-entry.use-case";
+import { EditMatchResult } from "../../modules/matches/application/edit-match-result.use-case";
+import { AnnullMatchResult } from "../../modules/matches/application/annull-match-result.use-case";
+import { PublishTournamentUseCase } from "../../modules/tournaments/application/publish-tournament.use-case";
+import { StartTournamentUseCase } from "../../modules/tournaments/application/start-tournament.use-case";
+import { CompleteTournamentUseCase } from "../../modules/tournaments/application/complete-tournament.use-case";
+import { CancelTournamentUseCase } from "../../modules/tournaments/application/cancel-tournament.use-case";
+import { ConfirmTournamentEntryUseCase } from "../../modules/tournaments/application/confirm-tournament-entry.use-case";
 
 export type HttpDependencies = {
     useCases: {
@@ -35,6 +43,14 @@ export type HttpDependencies = {
         recordMatchResult: RecordMatchResultUseCase;
         generateFullBracket: GenerateFullBracketUseCase;
         bracketView: BracketViewUseCase;
+        withdrawTournamentEntry: WithdrawTournamentEntry;
+        editMatchResult: EditMatchResult;
+        annullMatchResult: AnnullMatchResult;
+        publishTournament: PublishTournamentUseCase;
+        startTournament: StartTournamentUseCase;
+        completeTournament: CompleteTournamentUseCase;
+        cancelTournament: CancelTournamentUseCase;
+        confirmTournamentEntry: ConfirmTournamentEntryUseCase;
     };
     repositories: {
         players: PlayerRepository;

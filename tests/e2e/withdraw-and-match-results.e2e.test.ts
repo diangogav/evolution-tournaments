@@ -47,14 +47,15 @@ describe("Withdraw and Match Results E2E", () => {
         }
     });
 
-    it("should allow a participant to withdraw from a tournament", async () => {
+    it("should allow a participant to withdraw from a tournament in PUBLISHED state", async () => {
         // Arrange
         const tournament = await prisma.tournament.create({
             data: {
                 name: "Test Tournament",
                 discipline: "Test",
                 format: "SINGLE_ELIMINATION",
-                status: "PUBLISHED",
+                status: "PUBLISHED", // Must be PUBLISHED for withdrawal
+                participantType: "PLAYER",
             },
         });
 
@@ -70,17 +71,18 @@ describe("Withdraw and Match Results E2E", () => {
                 id: "entry-1",
                 tournamentId: tournament.id,
                 participantId: participant.id,
-                status: "PENDING",
+                status: "CONFIRMED", // Changed from PENDING to CONFIRMED
                 metadata: {},
             })
         );
 
         // Act
-        const useCase = new WithdrawTournamentEntry(tournamentEntryRepo);
-        await useCase.execute(entry.id);
+        const tournamentRepo = new (await import("../../src/modules/tournaments/infrastructure/persistence/prisma/tournament.repository")).PrismaTournamentRepository(prisma);
+        const useCase = new WithdrawTournamentEntry(tournamentEntryRepo, tournamentRepo);
+        await useCase.execute(entry.participantId, tournament.id);
 
         // Assert
-        const updatedEntry = await tournamentEntryRepo.findById(entry.id);
+        const updatedEntry = await tournamentEntryRepo.findByTournamentAndParticipant(tournament.id, entry.participantId);
         expect(updatedEntry?.status).toBe("WITHDRAWN");
     });
 

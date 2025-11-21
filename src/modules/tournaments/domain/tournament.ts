@@ -57,6 +57,52 @@ export class Tournament implements Identified {
   get maxParticipants() { return this.props.maxParticipants ?? null; }
   get webhookUrl() { return this.props.webhookUrl; }
 
+  // State transition methods
+  publish(): void {
+    if (this.props.status !== "DRAFT") {
+      throw new Error("Can only publish tournaments in DRAFT status");
+    }
+    this.props.status = "PUBLISHED";
+  }
+
+  start(): void {
+    if (this.props.status !== "PUBLISHED") {
+      throw new Error("Can only start tournaments in PUBLISHED status");
+    }
+    this.props.status = "STARTED";
+  }
+
+  complete(): void {
+    if (this.props.status !== "STARTED") {
+      throw new Error("Can only complete tournaments in STARTED status");
+    }
+    this.props.status = "COMPLETED";
+  }
+
+  cancel(): void {
+    if (this.props.status === "COMPLETED") {
+      throw new Error("Cannot cancel a completed tournament");
+    }
+    this.props.status = "CANCELLED";
+  }
+
+  // Validation methods
+  canEnroll(): boolean {
+    return this.props.status === "PUBLISHED";
+  }
+
+  canWithdraw(): boolean {
+    return this.props.status === "PUBLISHED";
+  }
+
+  canGenerateBracket(): boolean {
+    return this.props.status === "PUBLISHED";
+  }
+
+  canStartMatches(): boolean {
+    return this.props.status === "STARTED";
+  }
+
   toPrimitives() {
     return { ...this.props };
   }

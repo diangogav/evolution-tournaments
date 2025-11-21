@@ -25,6 +25,10 @@ export class RegisterTournamentEntryUseCase {
       throw new Error("Tournament not found");
     }
 
+    if (!tournament.canEnroll()) {
+      throw new Error("Tournament is not accepting enrollments. Tournament must be in PUBLISHED status.");
+    }
+
     const participant = await this.participants.findById(input.participantId);
     if (!participant) {
       throw new Error("Participant not found");
@@ -41,15 +45,27 @@ export class RegisterTournamentEntryUseCase {
       input.tournamentId
     );
 
-    // evitar duplicados
-    if (existingEntries.some((e) => e.participantId === participant.id)) {
-      throw new Error("Participant already registered in this tournament");
+    const existingEntry = existingEntries.find((e) => e.participantId === participant.id);
+
+    if (existingEntry) {
+      if (existingEntry.status === "WITHDRAWN") {
+        // Reactivate
+        existingEntry.reactivate(input.status ?? "PENDING");
+        // We might want to update metadata or groupId if provided?
+        // For now just reactivate.
+        await this.entries.save(existingEntry);
+        return existingEntry;
+      } else {
+        throw new Error("Participant already registered in this tournament");
+      }
     }
+
+    const activeEntries = existingEntries.filter(e => e.status !== "WITHDRAWN");
 
     // validar maxParticipants
     if (
       tournament.maxParticipants &&
-      existingEntries.length >= tournament.maxParticipants
+      activeEntries.length >= tournament.maxParticipants
     ) {
       throw new Error("Tournament is full");
     }
@@ -64,11 +80,13 @@ export class RegisterTournamentEntryUseCase {
       id: this.ids.generate(),
       tournamentId: tournament.id,
       participantId: participant.id,
-      status: input.status ?? "PENDING",
+      status: input.status ?? "CONFIRMED",
       groupId: input.groupId ?? null,
       seed: nextSeed,
       metadata: input.metadata ?? {},
     });
+
+    console.log(`[RegisterTournamentEntry] Creating entry: ${entry.id}, status: ${entry.status}, tournamentId: ${entry.tournamentId}`);
 
     return this.entries.create(entry);
   }

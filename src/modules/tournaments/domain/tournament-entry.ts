@@ -37,10 +37,31 @@ export class TournamentEntry implements Identified {
     return { ...this.props };
   }
 
+  confirm(): void {
+    if (this.props.status !== "PENDING") {
+      throw new Error("Can only confirm entries in PENDING status");
+    }
+    this.props.status = "CONFIRMED";
+  }
+
+  cancel(): void {
+    if (this.props.status !== "PENDING" && this.props.status !== "CONFIRMED") {
+      throw new Error("Can only cancel entries in PENDING or CONFIRMED status");
+    }
+    this.props.status = "CANCELLED";
+  }
+
   withdraw() {
     if (this.props.status !== "PENDING" && this.props.status !== "CONFIRMED") {
       throw new Error("Cannot withdraw from tournament unless status is PENDING or CONFIRMED");
     }
     this.props.status = "WITHDRAWN";
+  }
+
+  reactivate(status: TournamentEntryStatus = "PENDING") {
+    if (this.props.status !== "WITHDRAWN") {
+      throw new Error("Cannot reactivate tournament entry unless status is WITHDRAWN");
+    }
+    this.props.status = status;
   }
 }

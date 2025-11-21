@@ -2,6 +2,7 @@ import { Elysia, t } from "elysia";
 import {
     CreateMatchBody,
     RecordMatchResultBody,
+    EditMatchResultBody,
     IdentifierSchema,
 } from "../schemas";
 import type { HttpDependencies } from "../types";
@@ -29,8 +30,12 @@ export const matchesRoutes = (deps: HttpDependencies) =>
                         tournamentId: params.tournamentId,
                         participants: [{
                             participantId: body.participants[0].participantId,
+                            score: 0,
+                            result: null
                         }, {
                             participantId: body.participants[1].participantId,
+                            score: 0,
+                            result: null
                         }],
                     });
                 },
@@ -63,6 +68,46 @@ export const matchesRoutes = (deps: HttpDependencies) =>
                         matchId: IdentifierSchema,
                     }),
                     body: RecordMatchResultBody,
+                }
+            )
+            .put(
+                "/:matchId/result",
+                async ({ params, body, set }) => {
+                    await deps.useCases.editMatchResult.execute(
+                        params.matchId,
+                        [{
+                            participantId: body.participants[0].participantId,
+                            score: body.participants[0].score,
+                            result: body.participants[0].result ?? null
+                        }, {
+                            participantId: body.participants[1].participantId,
+                            score: body.participants[1].score,
+                            result: body.participants[1].result ?? null
+                        }]
+                    );
+
+                    set.status = 200;
+                    return { message: "Result updated" };
+                },
+                {
+                    params: t.Object({
+                        tournamentId: IdentifierSchema,
+                        matchId: IdentifierSchema,
+                    }),
+                    body: EditMatchResultBody,
+                }
+            )
+            .delete(
+                "/:matchId/result",
+                async ({ params, set }) => {
+                    await deps.useCases.annullMatchResult.execute(params.matchId);
+                    set.status = 204;
+                },
+                {
+                    params: t.Object({
+                        tournamentId: IdentifierSchema,
+                        matchId: IdentifierSchema,
+                    }),
                 }
             )
     );

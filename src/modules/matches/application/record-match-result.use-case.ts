@@ -29,6 +29,14 @@ export class RecordMatchResultUseCase {
       throw new Error("Match already completed");
     }
 
+    // Validate tournament state
+    const tournament = await this.tournaments.findById(match.tournamentId);
+    if (!tournament) throw new Error("Tournament not found");
+
+    if (!tournament.canStartMatches()) {
+      throw new Error("Cannot record match results. Tournament must be in STARTED status.");
+    }
+
     const [p1, p2] = input.participants;
 
     match.updateParticipantScore(p1.participantId, p1.score);
@@ -85,7 +93,11 @@ export class RecordMatchResultUseCase {
       // For single elimination, the final match has the highest round number
       const maxRound = Math.max(...allMatches.map(m => m.roundNumber));
       if (currentMatch.roundNumber === maxRound) {
-        // This is the final match!\
+        // This is the final match!
+        // Auto-complete tournament
+        tournament.complete();
+        await this.tournaments.update(tournament);
+
         if (tournament.webhookUrl && winnerId) {
           this.triggerWebhook(tournament.webhookUrl, {
             tournamentId: tournament.id,

@@ -27,4 +27,37 @@ export const entriesRoutes = (deps: HttpDependencies) =>
                     body: CreateTournamentEntryBody,
                 }
             )
+            .delete(
+                "/:participantId",
+                async ({ params, set }) => {
+                    await deps.useCases.withdrawTournamentEntry.execute(
+                        params.participantId,
+                        params.tournamentId
+                    );
+                    set.status = 201;
+                },
+                {
+                    params: t.Object({
+                        tournamentId: IdentifierSchema,
+                        participantId: IdentifierSchema,
+                    }),
+                }
+            )
+            .put(
+                "/:participantId/confirm",
+                async ({ params, set }) => {
+                    await deps.useCases.confirmTournamentEntry.execute(
+                        params.participantId,
+                        params.tournamentId
+                    );
+                    set.status = 200;
+                    return { message: "Entry confirmed" };
+                },
+                {
+                    params: t.Object({
+                        tournamentId: IdentifierSchema,
+                        participantId: IdentifierSchema,
+                    }),
+                }
+            )
     );

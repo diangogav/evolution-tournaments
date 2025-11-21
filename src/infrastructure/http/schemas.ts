@@ -136,3 +136,14 @@ export const RecordMatchResultBody = t.Object({
   ),
 });
 
+export const EditMatchResultBody = t.Object({
+  participants: t.Array(
+    t.Object({
+      participantId: IdentifierSchema,
+      score: t.Number({ minimum: 0 }),
+      result: t.Optional(MatchResultSchema),
+    }),
+    { minItems: 2, maxItems: 2 }
+  ),
+});
+

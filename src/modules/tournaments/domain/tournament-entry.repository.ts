@@ -5,6 +5,7 @@ export interface TournamentEntryRepository {
   create(entry: TournamentEntry): Promise<TournamentEntry>;
   listByTournament(tournamentId: UUID): Promise<TournamentEntry[]>;
   save(entry: TournamentEntry): Promise<void>;
-  findById(id: UUID): Promise<TournamentEntry | null>;
+  findByParticipantId(participantId: UUID): Promise<TournamentEntry | null>;
+  findByTournamentAndParticipant(tournamentId: UUID, participantId: UUID): Promise<TournamentEntry | null>;
 }
 

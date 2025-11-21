@@ -91,4 +91,44 @@ export class PrismaTournamentRepository implements TournamentRepository {
       metadata: stored.metadata ?? {},
     });
   }
+
+  async update(tournament: Tournament): Promise<Tournament> {
+    const data = tournament.toPrimitives();
+
+    const stored = await this.prisma.tournament.update({
+      where: { id: data.id },
+      data: {
+        name: data.name,
+        description: data.description,
+        discipline: data.discipline,
+        format: data.format,
+        status: data.status,
+        allowMixedParticipants: data.allowMixedParticipants,
+        participantType: data.participantType,
+        maxParticipants: data.maxParticipants,
+        startAt: data.startAt,
+        endAt: data.endAt,
+        location: data.location,
+        webhookUrl: data.webhookUrl,
+        metadata: JSON.parse(JSON.stringify(data.metadata)),
+      },
+    });
+
+    return Tournament.create({
+      id: stored.id,
+      name: stored.name,
+      description: stored.description,
+      discipline: stored.discipline,
+      format: stored.format,
+      status: stored.status,
+      allowMixedParticipants: stored.allowMixedParticipants,
+      participantType: stored.participantType,
+      maxParticipants: stored.maxParticipants,
+      startAt: stored.startAt,
+      endAt: stored.endAt,
+      location: stored.location,
+      webhookUrl: stored.webhookUrl,
+      metadata: stored.metadata ?? {},
+    });
+  }
 }

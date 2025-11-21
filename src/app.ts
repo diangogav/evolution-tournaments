@@ -31,6 +31,14 @@ import { GenerateSingleEliminationBracketUseCase } from "./modules/tournaments/a
 import { ListMatchesByTournamentUseCase } from "./modules/matches/application/list-matches-by-tournament.use-case";
 import { GenerateFullBracketUseCase } from "./modules/tournaments/application/generate-full-bracket.use-case";
 import { BracketViewUseCase } from "./modules/tournaments/application/view-bracket.use-case";
+import { WithdrawTournamentEntry } from "./modules/tournaments/application/withdraw-tournament-entry.use-case";
+import { EditMatchResult } from "./modules/matches/application/edit-match-result.use-case";
+import { AnnullMatchResult } from "./modules/matches/application/annull-match-result.use-case";
+import { PublishTournamentUseCase } from "./modules/tournaments/application/publish-tournament.use-case";
+import { StartTournamentUseCase } from "./modules/tournaments/application/start-tournament.use-case";
+import { CompleteTournamentUseCase } from "./modules/tournaments/application/complete-tournament.use-case";
+import { CancelTournamentUseCase } from "./modules/tournaments/application/cancel-tournament.use-case";
+import { ConfirmTournamentEntryUseCase } from "./modules/tournaments/application/confirm-tournament-entry.use-case";
 
 export const buildApp = async (externalPrisma?: PrismaClient) => {
   const prisma = externalPrisma ?? new PrismaClient();
@@ -127,6 +135,14 @@ export const buildApp = async (externalPrisma?: PrismaClient) => {
       repositories.matches,
       repositories.participants,
     ),
+    withdrawTournamentEntry: new WithdrawTournamentEntry(repositories.entries, repositories.tournaments),
+    editMatchResult: new EditMatchResult(repositories.matches),
+    annullMatchResult: new AnnullMatchResult(repositories.matches),
+    publishTournament: new PublishTournamentUseCase(repositories.tournaments),
+    startTournament: new StartTournamentUseCase(repositories.tournaments),
+    completeTournament: new CompleteTournamentUseCase(repositories.tournaments),
+    cancelTournament: new CancelTournamentUseCase(repositories.tournaments),
+    confirmTournamentEntry: new ConfirmTournamentEntryUseCase(repositories.entries),
   } as const;
 
   // ----------------------------------------

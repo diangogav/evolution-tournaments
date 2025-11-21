@@ -34,6 +34,10 @@ export class GenerateSingleEliminationBracketUseCase {
       participants: bracketOrder,
     });
 
+    // Auto-start tournament after generating bracket
+    tournament.start();
+    await this.tournaments.update(tournament);
+
     return {
       bracket: bracketOrder,
       matches: createdMatches,
@@ -43,6 +47,10 @@ export class GenerateSingleEliminationBracketUseCase {
   private async ensureValidTournament(tournamentId: UUID) {
     const tournament = await this.tournaments.findById(tournamentId);
     if (!tournament) throw new Error("Tournament not found");
+
+    if (!tournament.canGenerateBracket()) {
+      throw new Error("Cannot generate bracket. Tournament must be in PUBLISHED status.");
+    }
 
     if (tournament.format !== "SINGLE_ELIMINATION") {
       throw new Error("Tournament format is not SINGLE_ELIMINATION");
@@ -121,8 +129,8 @@ export class GenerateSingleEliminationBracketUseCase {
         tournamentId,
         roundNumber: 1,
         participants: [
-          { participantId: p1.participantId },
-          { participantId: p2.participantId },
+          { participantId: p1.participantId, score: null, result: null },
+          { participantId: p2.participantId, score: null, result: null },
         ],
         metadata: { position: i + 1 },
       });

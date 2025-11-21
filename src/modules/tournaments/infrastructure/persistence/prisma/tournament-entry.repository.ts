@@ -63,9 +63,27 @@ export class PrismaTournamentEntryRepository implements TournamentEntryRepositor
     });
   }
 
-  async findById(id: UUID): Promise<TournamentEntry | null> {
-    const stored = await this.prisma.tournamentEntry.findUnique({
-      where: { id },
+  async findByParticipantId(participantId: UUID): Promise<TournamentEntry | null> {
+    const stored = await this.prisma.tournamentEntry.findFirst({
+      where: { participantId },
+    });
+
+    if (!stored) return null;
+
+    return TournamentEntry.create({
+      id: stored.id,
+      tournamentId: stored.tournamentId,
+      participantId: stored.participantId,
+      status: stored.status,
+      groupId: stored.groupId,
+      seed: stored.seed,
+      metadata: stored.metadata ?? {},
+    });
+  }
+
+  async findByTournamentAndParticipant(tournamentId: UUID, participantId: UUID): Promise<TournamentEntry | null> {
+    const stored = await this.prisma.tournamentEntry.findFirst({
+      where: { tournamentId, participantId },
     });
 
     if (!stored) return null;

@@ -21,6 +21,11 @@ export class GenerateFullBracketUseCase {
         const tournament = await this.tournaments.findById(input.tournamentId);
         if (!tournament) throw new Error("Tournament not found");
 
+        // Validate tournament can generate bracket
+        if (!tournament.canGenerateBracket()) {
+            throw new Error("Cannot generate bracket. Tournament must be in PUBLISHED status.");
+        }
+
         const confirmed = (await this.entries.listByTournament(tournament.id))
             .filter(e => e.status === "CONFIRMED")
             .sort((a, b) => (a.seed ?? Infinity) - (b.seed ?? Infinity));
@@ -52,8 +57,8 @@ export class GenerateFullBracketUseCase {
                 tournamentId: tournament.id,
                 roundNumber: 1,
                 participants: [
-                    { participantId: p1.participantId },
-                    { participantId: p2.participantId },
+                    { participantId: p1.participantId, score: null, result: null },
+                    { participantId: p2.participantId, score: null, result: null },
                 ],
                 metadata: { position: i + 1 }
             });
@@ -78,8 +83,8 @@ export class GenerateFullBracketUseCase {
                     tournamentId: tournament.id,
                     roundNumber: r,
                     participants: [
-                        { participantId: "TBD_" + matchIdA },
-                        { participantId: "TBD_" + matchIdB },
+                        { participantId: "TBD_" + matchIdA, score: null, result: null },
+                        { participantId: "TBD_" + matchIdB, score: null, result: null },
                     ],
                     metadata: {
                         position: i / 2 + 1,
@@ -107,6 +112,10 @@ export class GenerateFullBracketUseCase {
             roundMatches.push(nextRound);
             prevRound = nextRound;
         }
+
+        // Auto-start tournament after generating bracket
+        tournament.start();
+        await this.tournaments.update(tournament);
 
         return {
             rounds: roundMatches,

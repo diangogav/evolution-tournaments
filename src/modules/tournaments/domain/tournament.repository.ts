@@ -5,5 +5,6 @@ export interface TournamentRepository {
   create(tournament: Tournament): Promise<Tournament>;
   list(): Promise<Tournament[]>;
   findById(id: UUID): Promise<Tournament | undefined>;
+  update(tournament: Tournament): Promise<Tournament>;
 }
 
