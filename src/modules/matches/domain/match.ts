@@ -113,6 +113,21 @@ export class Match implements Identified {
     participant.result = result as any;
   }
 
+  annullResult() {
+    this.props.completedAt = null;
+    this.props.participants.forEach(p => {
+      p.score = null;
+      p.result = null;
+    });
+  }
+
+  editResult(participants: [MatchParticipant, MatchParticipant]) {
+    if (!this.props.completedAt) {
+      throw new Error("Cannot edit result of an incomplete match");
+    }
+    this.props.participants = participants;
+  }
+
   withParticipants(participants: [MatchParticipant, MatchParticipant]): Match {
     return Match.create({
       ...this.toPrimitives(),

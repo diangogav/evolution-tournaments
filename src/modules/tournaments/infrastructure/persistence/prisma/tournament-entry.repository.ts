@@ -4,7 +4,7 @@ import type { UUID } from "../../../../shared/types";
 import { PrismaClient } from "@prisma/client";
 
 export class PrismaTournamentEntryRepository implements TournamentEntryRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaClient) { }
 
   async create(entry: TournamentEntry): Promise<TournamentEntry> {
     const data = entry.toPrimitives();
@@ -48,5 +48,36 @@ export class PrismaTournamentEntryRepository implements TournamentEntryRepositor
         metadata: stored.metadata ?? {},
       })
     );
+  }
+
+  async save(entry: TournamentEntry): Promise<void> {
+    const data = entry.toPrimitives();
+    await this.prisma.tournamentEntry.update({
+      where: { id: data.id },
+      data: {
+        status: data.status,
+        groupId: data.groupId,
+        seed: data.seed,
+        metadata: JSON.parse(JSON.stringify(data.metadata)),
+      },
+    });
+  }
+
+  async findById(id: UUID): Promise<TournamentEntry | null> {
+    const stored = await this.prisma.tournamentEntry.findUnique({
+      where: { id },
+    });
+
+    if (!stored) return null;
+
+    return TournamentEntry.create({
+      id: stored.id,
+      tournamentId: stored.tournamentId,
+      participantId: stored.participantId,
+      status: stored.status,
+      groupId: stored.groupId,
+      seed: stored.seed,
+      metadata: stored.metadata ?? {},
+    });
   }
 }

@@ -36,4 +36,11 @@ export class TournamentEntry implements Identified {
   toPrimitives() {
     return { ...this.props };
   }
+
+  withdraw() {
+    if (this.props.status !== "PENDING" && this.props.status !== "CONFIRMED") {
+      throw new Error("Cannot withdraw from tournament unless status is PENDING or CONFIRMED");
+    }
+    this.props.status = "WITHDRAWN";
+  }
 }
