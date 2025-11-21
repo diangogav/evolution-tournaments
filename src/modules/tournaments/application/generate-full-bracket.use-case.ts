@@ -18,113 +18,152 @@ export class GenerateFullBracketUseCase {
     ) { }
 
     async execute(input: { tournamentId: UUID }) {
-        const tournament = await this.tournaments.findById(input.tournamentId);
-        if (!tournament) throw new Error("Tournament not found");
+        const tournament = await this.loadTournament(input.tournamentId);
+        this.validateTournamentState(tournament);
 
-        // Validate tournament can generate bracket
+        const confirmed = await this.loadConfirmedEntries(tournament.id);
+        this.validateParticipantsCount(confirmed);
+
+        const rounds = Math.log2(confirmed.length);
+
+        const round1Pairs = this.generateRound1Pairs(confirmed);
+        const bracket = await this.buildBracket(tournament.id, rounds, round1Pairs);
+
+        tournament.start();
+        await this.tournaments.update(tournament);
+
+        return { rounds: bracket };
+    }
+
+    // ------------------------------
+    // LOADERS & VALIDATORS
+    // ------------------------------
+
+    private async loadTournament(id: UUID) {
+        const t = await this.tournaments.findById(id);
+        if (!t) throw new Error("Tournament not found");
+        return t;
+    }
+
+    private validateTournamentState(tournament: any) {
         if (!tournament.canGenerateBracket()) {
-            throw new Error("Cannot generate bracket. Tournament must be in PUBLISHED status.");
+            throw new Error("Cannot generate bracket. Tournament must be PUBLISHED.");
         }
+    }
 
-        const confirmed = (await this.entries.listByTournament(tournament.id))
+    private async loadConfirmedEntries(tournamentId: UUID) {
+        return (await this.entries.listByTournament(tournamentId))
             .filter(e => e.status === "CONFIRMED")
             .sort((a, b) => (a.seed ?? Infinity) - (b.seed ?? Infinity));
+    }
 
-        if (confirmed.length < 2)
+    private validateParticipantsCount(entries: TournamentEntry[]) {
+        if (entries.length < 2)
             throw new Error("Not enough participants");
 
-        const n = confirmed.length;
+        const n = entries.length;
         if ((n & (n - 1)) !== 0)
-            throw new Error("Participants count must be power of 2");
+            throw new Error("Participants count must be a power of 2");
+    }
 
-        const rounds = Math.log2(n);
+    // ------------------------------
+    // BRACKET BUILDING
+    // ------------------------------
 
-        // Round 1 seeding (ya correcto en tu versión actual)
-        const r1Pairs = this.generateRound1Pairs(confirmed);
+    private async buildBracket(tournamentId: UUID, rounds: number, round1Pairs: TournamentEntry[][]) {
+        const allRounds: string[][] = [];
 
-        // Crear bracket completo
-        const allMatches = [];
-        const roundMatches: string[][] = [];
+        const round1Matches = await this.createRound1(tournamentId, round1Pairs);
+        allRounds.push(round1Matches);
 
-        // R1
-        const r1MatchIds: string[] = [];
+        let previousMatches = round1Matches;
 
-        for (let i = 0; i < r1Pairs.length; i++) {
-            const p1 = r1Pairs[i][0];
-            const p2 = r1Pairs[i][1];
+        for (let r = 2; r <= rounds; r++) {
+            const nextMatches = await this.createNextRound(tournamentId, r, previousMatches);
+            allRounds.push(nextMatches);
+            previousMatches = nextMatches;
+        }
+
+        return allRounds;
+    }
+
+    // ------------------------------
+    // ROUND 1
+    // ------------------------------
+
+    private async createRound1(tournamentId: UUID, pairs: TournamentEntry[][]) {
+        const roundMatchIds: string[] = [];
+
+        for (let i = 0; i < pairs.length; i++) {
+            const [p1, p2] = pairs[i];
 
             const match = await this.createMatch.execute({
-                tournamentId: tournament.id,
+                tournamentId,
                 roundNumber: 1,
                 participants: [
                     { participantId: p1.participantId, score: null, result: null },
-                    { participantId: p2.participantId, score: null, result: null },
+                    { participantId: p2.participantId, score: null, result: null }
                 ],
                 metadata: { position: i + 1 }
             });
 
-            allMatches.push(match);
-            r1MatchIds.push(match.id);
+            roundMatchIds.push(match.id);
         }
 
-        roundMatches.push(r1MatchIds);
-
-        // R2 → Rn
-        let prevRound = r1MatchIds;
-
-        for (let r = 2; r <= rounds; r++) {
-            const nextRound: string[] = [];
-
-            for (let i = 0; i < prevRound.length; i += 2) {
-                const matchIdA = prevRound[i];
-                const matchIdB = prevRound[i + 1];
-
-                const newMatch = await this.createMatch.execute({
-                    tournamentId: tournament.id,
-                    roundNumber: r,
-                    participants: [
-                        { participantId: "TBD_" + matchIdA, score: null, result: null },
-                        { participantId: "TBD_" + matchIdB, score: null, result: null },
-                    ],
-                    metadata: {
-                        position: i / 2 + 1,
-                        from: [matchIdA, matchIdB]
-                    }
-                });
-
-                allMatches.push(newMatch);
-                nextRound.push(newMatch.id);
-
-                // Enlazar nextMatchId en los matches previos
-                const updateA = await this.matches.findById(matchIdA);
-                if (updateA) {
-                    updateA.toPrimitives().metadata.nextMatchId = newMatch.id;
-                    await this.matches.update(updateA);
-                }
-
-                const updateB = await this.matches.findById(matchIdB);
-                if (updateB) {
-                    updateB.toPrimitives().metadata.nextMatchId = newMatch.id;
-                    await this.matches.update(updateB);
-                }
-            }
-
-            roundMatches.push(nextRound);
-            prevRound = nextRound;
-        }
-
-        // Auto-start tournament after generating bracket
-        tournament.start();
-        await this.tournaments.update(tournament);
-
-        return {
-            rounds: roundMatches,
-        };
+        return roundMatchIds;
     }
+
+    // ------------------------------
+    // ROUNDS 2..N
+    // ------------------------------
+
+    private async createNextRound(tournamentId: UUID, roundNumber: number, prevRound: string[]) {
+        const nextMatchIds: string[] = [];
+
+        for (let i = 0; i < prevRound.length; i += 2) {
+            const matchA = prevRound[i];
+            const matchB = prevRound[i + 1];
+
+            const match = await this.createMatch.execute({
+                tournamentId,
+                roundNumber,
+                participants: [
+                    { participantId: "TBD_" + matchA, score: null, result: null },
+                    { participantId: "TBD_" + matchB, score: null, result: null }
+                ],
+                metadata: {
+                    position: i / 2 + 1,
+                    from: [matchA, matchB]
+                }
+            });
+
+            nextMatchIds.push(match.id);
+
+            await this.linkMatchesToNext(matchA, match.id);
+            await this.linkMatchesToNext(matchB, match.id);
+        }
+
+        return nextMatchIds;
+    }
+
+    private async linkMatchesToNext(previousMatchId: string, nextMatchId: string) {
+        const m = await this.matches.findById(previousMatchId);
+        if (!m) return;
+
+        const primitive = m.toPrimitives();
+        primitive.metadata.nextMatchId = nextMatchId;
+
+        await this.matches.update(m);
+    }
+
+    // ------------------------------
+    // SEEDING ALGORITHM
+    // ------------------------------
 
     private generateRound1Pairs(entries: TournamentEntry[]) {
         const n = entries.length;
         const rounds = Math.log2(n);
+
         let seeds = [1];
 
         for (let i = 1; i < rounds; i++) {

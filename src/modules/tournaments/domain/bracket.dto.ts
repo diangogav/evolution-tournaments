@@ -8,7 +8,10 @@ export interface BracketMatchView {
     id: string;
     roundNumber: number;
     position: number;
+    slotId: string; // "R1-P3"
     nextMatchId: string | null;
+    next: { round: number; position: number } | null;
+    from: { round: number; position: number }[];
     participant1?: BracketParticipantView;
     participant2?: BracketParticipantView;
     winnerId: string | null;

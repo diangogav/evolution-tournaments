@@ -13,6 +13,8 @@ import type { Match } from "../../matches/domain/match";
 import type { MatchParticipant } from "../../matches/domain/match-participant";
 
 export class BracketViewUseCase {
+    private matchesCache?: Map<string, Match>;
+
     constructor(
         private readonly tournaments: TournamentRepository,
         private readonly matches: MatchRepository,
@@ -23,21 +25,20 @@ export class BracketViewUseCase {
         const tournament = await this.tournaments.findById(input.tournamentId);
         if (!tournament) throw new Error("Tournament not found");
 
-        const matches = await this.matches.listByTournament(tournament.id);
-        if (matches.length === 0) {
+        const matchList = await this.matches.listByTournament(tournament.id);
+        if (matchList.length === 0) {
             return { tournamentId: tournament.id, rounds: [] };
         }
 
-        // ---------------------------------------------------
-        // 1) Preparar cache de participantes
-        // ---------------------------------------------------
-        const participantIds = this.collectParticipantIds(matches);
+        // Cache de matches para resolver from/next
+        this.matchesCache = new Map(matchList.map(m => [m.id, m]));
+
+        // Cache de participantes reales
+        const participantIds = this.collectParticipantIds(matchList);
         const participantsCache = await this.loadParticipants(participantIds);
 
-        // ---------------------------------------------------
-        // 2) Agrupar matches por ronda
-        // ---------------------------------------------------
-        const rounds = this.groupMatchesByRound(matches, participantsCache);
+        // Agrupar por rondas
+        const rounds = this.groupMatchesByRound(matchList, participantsCache);
 
         return {
             tournamentId: tournament.id,
@@ -46,7 +47,7 @@ export class BracketViewUseCase {
     }
 
     // ======================================================
-    // Helpers tipados
+    // Helpers
     // ======================================================
 
     private collectParticipantIds(matches: Match[]): string[] {
@@ -85,6 +86,7 @@ export class BracketViewUseCase {
         matches: Match[],
         participantsCache: Map<string, ParticipantViewCache>
     ): BracketRoundView[] {
+
         const roundsMap = new Map<number, Match[]>();
 
         for (const match of matches) {
@@ -110,15 +112,55 @@ export class BracketViewUseCase {
         match: Match,
         participantsCache: Map<string, ParticipantViewCache>
     ): BracketMatchView {
+
+        const round = match.roundNumber;
+        const position = (match.metadata.position as number) ?? 0;
+
+        // Ej: R2-P3
+        const slotId = `R${round}-P${position}`;
+
+        // Resolver FROM (los matches que alimentan a este)
+        const fromMatches = (match.metadata.from as string[] | undefined) ?? [];
+        const from = fromMatches
+            .map((matchId) => {
+                const prev = this.matchesCache!.get(matchId);
+                if (!prev) return null;
+
+                return {
+                    round: prev.roundNumber,
+                    position: (prev.metadata.position as number) ?? 0
+                };
+            })
+            .filter(Boolean) as { round: number; position: number }[];
+
+        // Resolver NEXT (a dónde alimenta este)
+        let next: { round: number; position: number } | null = null;
+        const nextId = match.metadata.nextMatchId as string | undefined;
+        if (nextId) {
+            const nextMatch = this.matchesCache!.get(nextId);
+            if (nextMatch) {
+                next = {
+                    round: nextMatch.roundNumber,
+                    position: (nextMatch.metadata.position as number) ?? 0
+                };
+            }
+        }
+
         const [p1, p2] = match.participants;
 
         return {
             id: match.id,
             roundNumber: match.roundNumber,
-            position: match.metadata.position as number ?? 0,
-            nextMatchId: match.metadata.nextMatchId as string ?? null,
+            position,
+            slotId,
+
+            nextMatchId: nextId ?? null,
+            next,
+            from,
+
             participant1: this.resolveParticipant(p1, participantsCache),
             participant2: this.resolveParticipant(p2, participantsCache),
+
             winnerId:
                 match.participants.find((p) => p.result === "win")
                     ?.participantId ?? null
@@ -129,6 +171,7 @@ export class BracketViewUseCase {
         participant: MatchParticipant,
         participantsCache: Map<string, ParticipantViewCache>
     ): BracketParticipantView | undefined {
+
         if (participant.participantId.startsWith("TBD")) return undefined;
 
         const cached = participantsCache.get(participant.participantId);
@@ -143,7 +186,7 @@ export class BracketViewUseCase {
 }
 
 // ----------------------------------------------------------
-// Tipos internos auxiliares — pero tipados
+// Tipos internos auxiliares
 // ----------------------------------------------------------
 interface ParticipantViewCache {
     id: string;
