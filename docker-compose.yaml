@@ -1,6 +1,24 @@
 version: '3.8'
 
 services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tournaments-api
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
+      - NODE_ENV=development
+      - USE_PRISMA=true
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - tournaments-network
+
   postgres:
     image: postgres:16.4-alpine
     container_name: evolution-tournaments
@@ -20,6 +38,12 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - tournaments-network
 
 # volumes:
 #   postgres_data:
+
+networks:
+  tournaments-network:
+    driver: bridge

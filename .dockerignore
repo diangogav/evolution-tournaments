@@ -1,0 +1,14 @@
+node_modules
+.git
+.gitignore
+*.log
+coverage
+tests
+rest-client
+thunder
+.DS_Store
+README.md
+*.md
+.github
+.vscode
+vitest.node.config.ts
