@@ -3,7 +3,7 @@
   "version": "1.0.50",
   "scripts": {
     "test:e2e": "vitest --config vitest.node.config.ts",
-    "dev": "bun run --watch src/index.ts",
+    "dev": "bun run src/index.ts",
     "migrate:deploy": "npx prisma migrate deploy",
     "prisma:generate": "bunx prisma@6.19.0 generate",
     "db:seed": "npx prisma db seed"
