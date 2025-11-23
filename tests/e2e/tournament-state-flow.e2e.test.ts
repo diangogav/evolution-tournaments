@@ -15,7 +15,7 @@ describe("🔄 E2E — Tournament State Flow", () => {
     });
 
     describe("Setup: Create participants", () => {
-        test.only("1. Create 2 players", async () => {
+        test("1. Create 2 players", async () => {
             for (let i = 1; i <= 2; i++) {
                 const res = await api.players.post({
                     displayName: `StateFlow Player ${i}`,
@@ -25,7 +25,7 @@ describe("🔄 E2E — Tournament State Flow", () => {
             }
         });
 
-        test.only("2. Create 2 participants", async () => {
+        test("2. Create 2 participants", async () => {
             const players = await api.players.get();
             expect(players.error).toBeNull();
 
@@ -47,7 +47,7 @@ describe("🔄 E2E — Tournament State Flow", () => {
     });
 
     describe("Phase 1: PUBLISHED state operations", () => {
-        test.only("3. Create tournament in PUBLISHED state", async () => {
+        test("3. Create tournament in PUBLISHED state", async () => {
             const res = await api.tournaments.post({
                 name: "State Flow Test Tournament",
                 discipline: "YGO",
@@ -61,7 +61,7 @@ describe("🔄 E2E — Tournament State Flow", () => {
             tournamentId = res.data.id;
         });
 
-        test.only("4. Enroll participants (allowed in PUBLISHED)", async () => {
+        test("4. Enroll participants (allowed in PUBLISHED)", async () => {
             for (const pid of participantIds) {
                 const response = await api.tournaments[tournamentId].entries.post({
                     participantId: pid,
@@ -73,12 +73,12 @@ describe("🔄 E2E — Tournament State Flow", () => {
             }
         });
 
-        test.only("5. Withdraw participant (allowed in PUBLISHED)", async () => {
+        test("5. Withdraw participant (allowed in PUBLISHED)", async () => {
             const response = await api.tournaments[tournamentId].entries[participantIds[0]].delete();
             expect(response.error).toBeNull();
         });
 
-        test.only("6. Re-enroll participant (test reactivation)", async () => {
+        test("6. Re-enroll participant (test reactivation)", async () => {
             const response = await api.tournaments[tournamentId].entries.post({
                 participantId: participantIds[0],
                 status: "CONFIRMED"
@@ -90,19 +90,19 @@ describe("🔄 E2E — Tournament State Flow", () => {
     });
 
     describe("Phase 2: Auto-start on bracket generation", () => {
-        test.only("7. Generate bracket (should auto-start tournament)", async () => {
+        test("7. Generate bracket (should auto-start tournament)", async () => {
             const response = await api.tournaments[tournamentId].bracket["generate-full"].post();
             expect(response.error).toBeNull();
             expect(response.status).toBe(201);
         });
 
-        test.only("8. Verify tournament is now in STARTED state", async () => {
+        test("8. Verify tournament is now in STARTED state", async () => {
             const res = await api.tournaments[tournamentId].get();
             expect(res.error).toBeNull();
             expect(res.data.status).toBe("STARTED");
         });
 
-        test.only("9. Get match ID for later tests", async () => {
+        test("9. Get match ID for later tests", async () => {
             const res = await api.tournaments[tournamentId].matches.get();
             expect(res.error).toBeNull();
             expect(res.data.length).toBeGreaterThan(0);
@@ -111,7 +111,7 @@ describe("🔄 E2E — Tournament State Flow", () => {
     });
 
     describe("Phase 3: STARTED state validations", () => {
-        test.only("10. Enrollment should fail in STARTED state", async () => {
+        test("10. Enrollment should fail in STARTED state", async () => {
             // Create a new participant to try enrolling
             const playerRes = await api.players.post({
                 displayName: "Late Player",
@@ -137,13 +137,13 @@ describe("🔄 E2E — Tournament State Flow", () => {
             expect(enrollRes.status).toBe(500);
         });
 
-        test.only("11. Withdrawal should fail in STARTED state", async () => {
+        test("11. Withdrawal should fail in STARTED state", async () => {
             const response = await api.tournaments[tournamentId].entries[participantIds[0]].delete();
             expect(response.error).not.toBeNull();
             expect(response.status).toBe(500);
         });
 
-        test.only("12. Bracket generation should fail in STARTED state", async () => {
+        test("12. Bracket generation should fail in STARTED state", async () => {
             const response = await api.tournaments[tournamentId].bracket["generate-full"].post();
             expect(response.error).not.toBeNull();
             expect(response.status).toBe(500);
@@ -151,7 +151,7 @@ describe("🔄 E2E — Tournament State Flow", () => {
     });
 
     describe("Phase 4: Auto-complete on final match", () => {
-        test.only("13. Record match result (should auto-complete tournament)", async () => {
+        test("13. Record match result (should auto-complete tournament)", async () => {
             const response = await api.tournaments[tournamentId].matches[matchId].result.post({
                 participants: [
                     { participantId: participantIds[0], score: 2 },
@@ -162,7 +162,7 @@ describe("🔄 E2E — Tournament State Flow", () => {
             expect(response.error).toBeNull();
         });
 
-        test.only("14. Verify tournament is now in COMPLETED state", async () => {
+        test("14. Verify tournament is now in COMPLETED state", async () => {
             const res = await api.tournaments[tournamentId].get();
             expect(res.error).toBeNull();
             expect(res.data.status).toBe("COMPLETED");
@@ -170,7 +170,7 @@ describe("🔄 E2E — Tournament State Flow", () => {
     });
 
     describe("Phase 5: COMPLETED state validations", () => {
-        test.only("15. Enrollment should fail in COMPLETED state", async () => {
+        test("15. Enrollment should fail in COMPLETED state", async () => {
             const playerRes = await api.players.post({
                 displayName: "Very Late Player",
                 countryCode: "VE"
@@ -198,7 +198,7 @@ describe("🔄 E2E — Tournament State Flow", () => {
     describe("Phase 6: Cancellation tests", () => {
         let cancelTestTournamentId: string;
 
-        test.only("16. Create tournament for cancellation test", async () => {
+        test("16. Create tournament for cancellation test", async () => {
             const res = await api.tournaments.post({
                 name: "Cancellation Test Tournament",
                 discipline: "YGO",
@@ -212,12 +212,12 @@ describe("🔄 E2E — Tournament State Flow", () => {
             cancelTestTournamentId = res.data.id;
         });
 
-        test.only("17. Cancel tournament in PUBLISHED state", async () => {
+        test("17. Cancel tournament in PUBLISHED state", async () => {
             const response = await api.tournaments[cancelTestTournamentId].cancel.put();
             expect(response.error).toBeNull();
         });
 
-        test.only("18. Verify tournament is now CANCELLED", async () => {
+        test("18. Verify tournament is now CANCELLED", async () => {
             const res = await api.tournaments[cancelTestTournamentId].get();
             expect(res.error).toBeNull();
             expect(res.data.status).toBe("CANCELLED");

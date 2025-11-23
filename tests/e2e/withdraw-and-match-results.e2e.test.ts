@@ -9,43 +9,17 @@ import { EditMatchResult } from "../../src/modules/matches/application/edit-matc
 import { PrismaMatchRepository } from "../../src/modules/matches/infrastructure/persistence/prisma/match.repository";
 import { TournamentEntry } from "../../src/modules/tournaments/domain/tournament-entry";
 import { Match } from "../../src/modules/matches/domain/match";
+import { prisma } from "./setup";
 
 describe("Withdraw and Match Results E2E", () => {
-    let container: StartedPostgreSqlContainer;
-    let prisma: PrismaClient;
     let tournamentEntryRepo: PrismaTournamentEntryRepository;
     let matchRepo: PrismaMatchRepository;
 
     beforeAll(async () => {
-        container = await new PostgreSqlContainer("postgres:15").start();
-        const databaseUrl = container.getConnectionUri();
-
-        process.env.DATABASE_URL = databaseUrl;
-
-        execSync("bunx prisma@6.19.0 migrate deploy", {
-            env: { ...process.env, DATABASE_URL: databaseUrl },
-        });
-
-        prisma = new PrismaClient({
-            datasources: {
-                db: {
-                    url: databaseUrl,
-                },
-            },
-        });
-
         tournamentEntryRepo = new PrismaTournamentEntryRepository(prisma);
         matchRepo = new PrismaMatchRepository(prisma);
-    }, 60000);
-
-    afterAll(async () => {
-        if (prisma) {
-            await prisma.$disconnect();
-        }
-        if (container) {
-            await container.stop();
-        }
     });
+
 
     it("should allow a participant to withdraw from a tournament in PUBLISHED state", async () => {
         // Arrange
