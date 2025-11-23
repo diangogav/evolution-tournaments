@@ -14,7 +14,14 @@ export const bracketRoutes = (deps: HttpDependencies) =>
                 set.status = 201;
                 return { message: "Bracket generated" };
             },
-            { params: t.Object({ tournamentId: IdentifierSchema }) }
+            {
+                params: t.Object({ tournamentId: IdentifierSchema }),
+                detail: {
+                    tags: ['Brackets'],
+                    summary: 'Generar bracket',
+                    description: 'Genera el bracket de eliminación simple del torneo'
+                }
+            }
         )
             .post(
                 "/generate-full",
@@ -26,7 +33,14 @@ export const bracketRoutes = (deps: HttpDependencies) =>
                     set.status = 201;
                     return { message: "Full bracket generated" };
                 },
-                { params: t.Object({ tournamentId: IdentifierSchema }) }
+                {
+                    params: t.Object({ tournamentId: IdentifierSchema }),
+                    detail: {
+                        tags: ['Brackets'],
+                        summary: 'Generar bracket completo',
+                        description: 'Genera el bracket completo con todos los partidos'
+                    }
+                }
             )
             .get(
                 "/",
@@ -34,6 +48,13 @@ export const bracketRoutes = (deps: HttpDependencies) =>
                     deps.useCases.bracketView.execute({
                         tournamentId: params.tournamentId,
                     }),
-                { params: t.Object({ tournamentId: IdentifierSchema }) }
+                {
+                    params: t.Object({ tournamentId: IdentifierSchema }),
+                    detail: {
+                        tags: ['Brackets'],
+                        summary: 'Ver bracket',
+                        description: 'Obtiene la visualización del bracket del torneo'
+                    }
+                }
             )
     );

@@ -18,7 +18,14 @@ export const matchesRoutes = (deps: HttpDependencies) =>
                             tournamentId: params.tournamentId,
                         })
                     ).map((m) => m.toPrimitives()),
-                { params: t.Object({ tournamentId: IdentifierSchema }) }
+                {
+                    params: t.Object({ tournamentId: IdentifierSchema }),
+                    detail: {
+                        tags: ['Matches'],
+                        summary: 'Listar partidos',
+                        description: 'Obtiene todos los partidos de un torneo'
+                    }
+                }
             )
 
             .post(
@@ -42,6 +49,11 @@ export const matchesRoutes = (deps: HttpDependencies) =>
                 {
                     params: t.Object({ tournamentId: IdentifierSchema }),
                     body: CreateMatchBody,
+                    detail: {
+                        tags: ['Matches'],
+                        summary: 'Crear partido',
+                        description: 'Crea un nuevo partido en el torneo'
+                    }
                 }
             )
 
@@ -68,6 +80,11 @@ export const matchesRoutes = (deps: HttpDependencies) =>
                         matchId: IdentifierSchema,
                     }),
                     body: RecordMatchResultBody,
+                    detail: {
+                        tags: ['Matches'],
+                        summary: 'Registrar resultado',
+                        description: 'Registra el resultado de un partido'
+                    }
                 }
             )
             .put(
@@ -95,6 +112,11 @@ export const matchesRoutes = (deps: HttpDependencies) =>
                         matchId: IdentifierSchema,
                     }),
                     body: EditMatchResultBody,
+                    detail: {
+                        tags: ['Matches'],
+                        summary: 'Editar resultado',
+                        description: 'Edita el resultado de un partido'
+                    }
                 }
             )
             .delete(
@@ -108,6 +130,11 @@ export const matchesRoutes = (deps: HttpDependencies) =>
                         tournamentId: IdentifierSchema,
                         matchId: IdentifierSchema,
                     }),
+                    detail: {
+                        tags: ['Matches'],
+                        summary: 'Anular resultado',
+                        description: 'Anula el resultado de un partido'
+                    }
                 }
             )
     );

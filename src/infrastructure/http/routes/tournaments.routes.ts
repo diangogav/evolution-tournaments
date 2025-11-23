@@ -6,14 +6,27 @@ export const tournamentsRoutes = (deps: HttpDependencies) =>
     new Elysia()
         .group("/tournaments", (app) =>
             app
-                .get("/", () => deps.repositories.tournaments.list())
+                .get("/", () => deps.repositories.tournaments.list(), {
+                    detail: {
+                        tags: ['Tournaments'],
+                        summary: 'Listar torneos',
+                        description: 'Obtiene la lista completa de torneos'
+                    }
+                })
                 .get(
                     "/:tournamentId",
                     async ({ params }) =>
                         (
                             await deps.repositories.tournaments.findById(params.tournamentId)
                         )?.toPrimitives(),
-                    { params: t.Object({ tournamentId: IdentifierSchema }) }
+                    {
+                        params: t.Object({ tournamentId: IdentifierSchema }),
+                        detail: {
+                            tags: ['Tournaments'],
+                            summary: 'Obtener torneo',
+                            description: 'Obtiene los detalles de un torneo específico'
+                        }
+                    }
                 )
                 .post(
                     "/",
@@ -24,7 +37,14 @@ export const tournamentsRoutes = (deps: HttpDependencies) =>
                         set.status = 201;
                         return tournament.toPrimitives();
                     },
-                    { body: CreateTournamentBody }
+                    {
+                        body: CreateTournamentBody,
+                        detail: {
+                            tags: ['Tournaments'],
+                            summary: 'Crear torneo',
+                            description: 'Crea un nuevo torneo'
+                        }
+                    }
                 )
                 .put(
                     "/:tournamentId/publish",
@@ -33,7 +53,14 @@ export const tournamentsRoutes = (deps: HttpDependencies) =>
                         set.status = 200;
                         return { message: "Tournament published" };
                     },
-                    { params: t.Object({ tournamentId: IdentifierSchema }) }
+                    {
+                        params: t.Object({ tournamentId: IdentifierSchema }),
+                        detail: {
+                            tags: ['Tournaments'],
+                            summary: 'Publicar torneo',
+                            description: 'Cambia el estado del torneo a publicado'
+                        }
+                    }
                 )
                 .put(
                     "/:tournamentId/start",
@@ -42,7 +69,14 @@ export const tournamentsRoutes = (deps: HttpDependencies) =>
                         set.status = 200;
                         return { message: "Tournament started" };
                     },
-                    { params: t.Object({ tournamentId: IdentifierSchema }) }
+                    {
+                        params: t.Object({ tournamentId: IdentifierSchema }),
+                        detail: {
+                            tags: ['Tournaments'],
+                            summary: 'Iniciar torneo',
+                            description: 'Inicia el torneo'
+                        }
+                    }
                 )
                 .put(
                     "/:tournamentId/complete",
@@ -51,7 +85,14 @@ export const tournamentsRoutes = (deps: HttpDependencies) =>
                         set.status = 200;
                         return { message: "Tournament completed" };
                     },
-                    { params: t.Object({ tournamentId: IdentifierSchema }) }
+                    {
+                        params: t.Object({ tournamentId: IdentifierSchema }),
+                        detail: {
+                            tags: ['Tournaments'],
+                            summary: 'Completar torneo',
+                            description: 'Marca el torneo como completado'
+                        }
+                    }
                 )
                 .put(
                     "/:tournamentId/cancel",
@@ -60,6 +101,13 @@ export const tournamentsRoutes = (deps: HttpDependencies) =>
                         set.status = 200;
                         return { message: "Tournament cancelled" };
                     },
-                    { params: t.Object({ tournamentId: IdentifierSchema }) }
+                    {
+                        params: t.Object({ tournamentId: IdentifierSchema }),
+                        detail: {
+                            tags: ['Tournaments'],
+                            summary: 'Cancelar torneo',
+                            description: 'Cancela el torneo'
+                        }
+                    }
                 )
         );

@@ -10,7 +10,13 @@ export const teamsRoutes = (deps: HttpDependencies) =>
     new Elysia().group("/teams", (app) =>
         app
             // Listar equipos
-            .get("/", () => deps.repositories.teams.list())
+            .get("/", () => deps.repositories.teams.list(), {
+                detail: {
+                    tags: ['Teams'],
+                    summary: 'Listar equipos',
+                    description: 'Obtiene la lista completa de equipos'
+                }
+            })
 
             // Obtener equipo por ID
             .get(
@@ -25,7 +31,14 @@ export const teamsRoutes = (deps: HttpDependencies) =>
 
                     return team;
                 },
-                { params: t.Object({ teamId: IdentifierSchema }) }
+                {
+                    params: t.Object({ teamId: IdentifierSchema }),
+                    detail: {
+                        tags: ['Teams'],
+                        summary: 'Obtener equipo',
+                        description: 'Obtiene los detalles de un equipo específico'
+                    }
+                }
             )
 
             // Crear equipo
@@ -36,7 +49,14 @@ export const teamsRoutes = (deps: HttpDependencies) =>
                     set.status = 201;
                     return team;
                 },
-                { body: CreateTeamBody }
+                {
+                    body: CreateTeamBody,
+                    detail: {
+                        tags: ['Teams'],
+                        summary: 'Crear equipo',
+                        description: 'Crea un nuevo equipo'
+                    }
+                }
             )
 
             // Agregar miembro a un equipo
@@ -54,6 +74,11 @@ export const teamsRoutes = (deps: HttpDependencies) =>
                 {
                     params: t.Object({ teamId: IdentifierSchema }),
                     body: AddTeamMemberBody,
+                    detail: {
+                        tags: ['Teams'],
+                        summary: 'Agregar miembro',
+                        description: 'Agrega un miembro a un equipo'
+                    }
                 }
             )
     );

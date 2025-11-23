@@ -152,7 +152,11 @@ export const buildApp = async (externalPrisma?: PrismaClient) => {
     useCases,
     repositories
   }).onError(({ error, set }) => {
-    console.error("❌ Internal Error:", error);
+    // do something
+    if (!error) return;
+
+    console.error(error);
+
     set.status = 500;
     return { message: "Internal Server Error" };
   });

@@ -9,7 +9,14 @@ export const entriesRoutes = (deps: HttpDependencies) =>
                 "/",
                 ({ params }) =>
                     deps.repositories.entries.listByTournament(params.tournamentId),
-                { params: t.Object({ tournamentId: IdentifierSchema }) }
+                {
+                    params: t.Object({ tournamentId: IdentifierSchema }),
+                    detail: {
+                        tags: ['Entries'],
+                        summary: 'Listar inscripciones',
+                        description: 'Obtiene todas las inscripciones de un torneo'
+                    }
+                }
             )
             .post(
                 "/",
@@ -25,6 +32,11 @@ export const entriesRoutes = (deps: HttpDependencies) =>
                 {
                     params: t.Object({ tournamentId: IdentifierSchema }),
                     body: CreateTournamentEntryBody,
+                    detail: {
+                        tags: ['Entries'],
+                        summary: 'Registrar inscripción',
+                        description: 'Registra un participante en el torneo'
+                    }
                 }
             )
             .delete(
@@ -41,6 +53,11 @@ export const entriesRoutes = (deps: HttpDependencies) =>
                         tournamentId: IdentifierSchema,
                         participantId: IdentifierSchema,
                     }),
+                    detail: {
+                        tags: ['Entries'],
+                        summary: 'Retirar inscripción',
+                        description: 'Retira un participante del torneo'
+                    }
                 }
             )
             .put(
@@ -58,6 +75,11 @@ export const entriesRoutes = (deps: HttpDependencies) =>
                         tournamentId: IdentifierSchema,
                         participantId: IdentifierSchema,
                     }),
+                    detail: {
+                        tags: ['Entries'],
+                        summary: 'Confirmar inscripción',
+                        description: 'Confirma la inscripción de un participante'
+                    }
                 }
             )
     );

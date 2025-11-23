@@ -9,7 +9,13 @@ export const participantsRoutes = (deps: HttpDependencies) =>
                 .get("/", async () =>
                     (await deps.repositories.participants.list()).map((p) =>
                         p.toPrimitives()
-                    )
+                    ), {
+                    detail: {
+                        tags: ['Participants'],
+                        summary: 'Listar participantes',
+                        description: 'Obtiene la lista completa de participantes'
+                    }
+                }
                 )
                 .get(
                     "/:participantId",
@@ -19,7 +25,14 @@ export const participantsRoutes = (deps: HttpDependencies) =>
                                 params.participantId
                             )
                         )?.toPrimitives(),
-                    { params: t.Object({ participantId: IdentifierSchema }) }
+                    {
+                        params: t.Object({ participantId: IdentifierSchema }),
+                        detail: {
+                            tags: ['Participants'],
+                            summary: 'Obtener participante',
+                            description: 'Obtiene los detalles de un participante específico'
+                        }
+                    }
                 )
                 .post(
                     "/",
@@ -29,6 +42,13 @@ export const participantsRoutes = (deps: HttpDependencies) =>
                         set.status = 201;
                         return participant.toPrimitives();
                     },
-                    { body: CreateParticipantBody }
+                    {
+                        body: CreateParticipantBody,
+                        detail: {
+                            tags: ['Participants'],
+                            summary: 'Crear participante',
+                            description: 'Crea un nuevo participante (jugador o equipo)'
+                        }
+                    }
                 )
         );

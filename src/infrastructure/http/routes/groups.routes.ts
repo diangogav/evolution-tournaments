@@ -6,9 +6,22 @@ export const groupsRoutes = (deps: HttpDependencies) =>
     new Elysia()
         .group("/groups", (app) =>
             app
-                .get("/", () => deps.repositories.groups.list())
+                .get("/", () => deps.repositories.groups.list(), {
+                    detail: {
+                        tags: ['Groups'],
+                        summary: 'Listar grupos',
+                        description: 'Obtiene la lista completa de grupos'
+                    }
+                })
                 .post("/", ({ body, set }) => {
                     set.status = 201;
                     return deps.useCases.createGroup.execute(body);
-                }, { body: CreateGroupBody })
+                }, {
+                    body: CreateGroupBody,
+                    detail: {
+                        tags: ['Groups'],
+                        summary: 'Crear grupo',
+                        description: 'Crea un nuevo grupo en el torneo'
+                    }
+                })
         );
