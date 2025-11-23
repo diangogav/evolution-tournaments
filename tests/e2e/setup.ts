@@ -29,7 +29,9 @@ beforeAll(async () => {
     process.env.USE_PRISMA = "true";
 
     console.log("🔄 Running migrations…");
-    await asyncExec(`./node_modules/.bin/prisma migrate deploy`);
+    await asyncExec(`bunx prisma@6.19.0 migrate deploy`, {
+        env: { ...process.env, DATABASE_URL: dbUrl }
+    });
 
     prisma = new PrismaClient();
     await prisma.$connect();

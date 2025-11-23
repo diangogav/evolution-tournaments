@@ -22,7 +22,7 @@ describe("Withdraw and Match Results E2E", () => {
 
         process.env.DATABASE_URL = databaseUrl;
 
-        execSync("npx prisma migrate deploy", {
+        execSync("bunx prisma@6.19.0 migrate deploy", {
             env: { ...process.env, DATABASE_URL: databaseUrl },
         });
 
