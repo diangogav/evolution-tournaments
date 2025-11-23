@@ -21,7 +21,7 @@ jobs:
         run: bun install
 
       - name: Generate Prisma Client
-        run: bun run prisma:generate
+        run: bunx prisma@6.19.0 generate
 
       - name: Run tests
         run: npm run test:e2e
