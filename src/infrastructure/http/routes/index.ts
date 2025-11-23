@@ -10,8 +10,25 @@ import { matchesRoutes } from "./matches.routes";
 import { groupsRoutes } from "./groups.routes";
 import { HttpDependencies } from "../types";
 
-export const registerRoutes = (app: Elysia, deps: HttpDependencies) =>
-    app
+import { cors } from "@elysiajs/cors";
+import { rateLimit } from "elysia-rate-limit";
+
+export const registerRoutes = (app: Elysia, deps: HttpDependencies) => {
+    const isTest = process.env.NODE_ENV === 'test';
+
+    return app
+        .use(cors())
+        .use(isTest ? (a) => a : rateLimit())
+        .onRequest(({ set }) => {
+            set.headers['X-Content-Type-Options'] = 'nosniff';
+            set.headers['X-Frame-Options'] = 'DENY';
+            set.headers['X-XSS-Protection'] = '1; mode=block';
+        })
+        .get("/health", () => ({
+            status: "ok",
+            timestamp: new Date().toISOString(),
+            uptime: process.uptime()
+        }))
         .use(playersRoutes(deps))
         .use(teamsRoutes(deps))
         .use(participantsRoutes(deps))
@@ -20,3 +37,4 @@ export const registerRoutes = (app: Elysia, deps: HttpDependencies) =>
         .use(bracketRoutes(deps))
         .use(matchesRoutes(deps))
         .use(groupsRoutes(deps));
+};

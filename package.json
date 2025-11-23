@@ -11,10 +11,13 @@
     "seed": "ts-node --transpile-only prisma/seed.ts"
   },
   "dependencies": {
+    "@elysiajs/cors": "^1.4.0",
     "@elysiajs/eden": "^1.4.5",
     "@prisma/client": "^6.19.0",
     "elysia": "latest",
-    "pg": "^8.16.3"
+    "elysia-rate-limit": "^4.4.2",
+    "pg": "^8.16.3",
+    "pino": "^10.1.0"
   },
   "devDependencies": {
     "@testcontainers/postgresql": "^11.8.1",
