@@ -174,50 +174,6 @@ El proyecto utiliza Prisma como ORM. El esquema se encuentra en `prisma/schema.p
 - **Groups**: Grupos dentro de torneos
 - **Matches**: Partidos entre participantes
 
-## 🔒 Seguridad
-
-El proyecto implementa las siguientes medidas de seguridad:
-
-- ✅ CORS configurado
-- ✅ Rate limiting
-- ✅ Headers de seguridad (X-Content-Type-Options, X-Frame-Options, X-XSS-Protection)
-- ✅ Validación de entrada con Elysia
-- ✅ Contenedores Docker con usuarios no privilegiados
-
-Ver [SECURITY.md](./SECURITY.md) para más detalles.
-
-## 📝 API Endpoints
-
-### Health Check
-```
-GET /health
-```
-
-### Players
-```
-POST   /players
-GET    /players/:id
-```
-
-### Teams
-```
-POST   /teams
-POST   /teams/:id/members
-```
-
-### Tournaments
-```
-POST   /tournaments
-POST   /tournaments/:id/entries
-POST   /tournaments/:id/bracket/generate
-GET    /tournaments/:id/bracket
-```
-
-### Matches
-```
-POST   /matches/:id/result
-GET    /tournaments/:id/matches
-```
 
 ## 🛠️ Stack Tecnológico
 
@@ -250,22 +206,8 @@ POSTGRES_PASSWORD=password
 # Aplicación
 NODE_ENV=development
 PORT=3000
-USE_PRISMA=true
-
-# Seguridad (opcional)
-CORS_ORIGIN=*
-LOG_LEVEL=info
 ```
 
-## 🚢 Despliegue a Producción
-
-Ver la [Guía de Despliegue a Producción](./production_deployment_guide.md) para instrucciones detalladas sobre:
-
-- Configuración de entorno de producción
-- Dockerización
-- CI/CD con GitHub Actions
-- Monitoreo y logging
-- Optimización de performance
 
 ## 🤝 Contribución
 
