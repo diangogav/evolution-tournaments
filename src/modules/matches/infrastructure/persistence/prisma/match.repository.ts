@@ -41,6 +41,8 @@ export class PrismaMatchRepository implements MatchRepository {
       format: row.format,
       participants,
       metadata: row.metadata ?? {},
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
     });
   }
 

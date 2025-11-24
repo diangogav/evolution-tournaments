@@ -4,27 +4,29 @@ import { Player } from "../../../domain/player";
 import { PrismaClient } from "@prisma/client";
 
 export class PrismaPlayerRepository implements PlayerRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaClient) { }
 
   async create(player: Player): Promise<Player> {
     const data = player.toPrimitives();
-  
+
     const stored = await this.prisma.player.create({
       data: {
         ...data,
         metadata: JSON.parse(JSON.stringify(data.metadata)), // convierte a JSON-safe
       },
     });
-  
-    return Player.create({
+
+    return Player.fromPrimitives({
       ...stored,
       metadata: stored.metadata ?? {},
+      createdAt: stored.createdAt,
+      updatedAt: stored.updatedAt,
     });
   }
 
   async list(): Promise<Player[]> {
     const players = await this.prisma.player.findMany();
-    return players.map((player) => Player.create({
+    return players.map((player) => Player.fromPrimitives({
       ...player,
       metadata: {
         ...player.metadata as {}
@@ -37,7 +39,7 @@ export class PrismaPlayerRepository implements PlayerRepository {
       where: { id },
     });
 
-    return player ? Player.create({
+    return player ? Player.fromPrimitives({
       ...player,
       metadata: {
         ...player.metadata as {}

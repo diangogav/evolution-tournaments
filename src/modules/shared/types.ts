@@ -2,6 +2,8 @@ export type UUID = string;
 
 export interface Identified {
   id: UUID;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export type ParticipantType = "PLAYER" | "TEAM";

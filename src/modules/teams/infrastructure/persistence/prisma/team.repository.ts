@@ -5,7 +5,7 @@ import { PrismaClient } from "@prisma/client";
 
 
 export class PrismaTeamRepository implements TeamRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaClient) { }
 
   async create(team: Team): Promise<Team> {
     const data = team.toPrimitives();
@@ -14,16 +14,21 @@ export class PrismaTeamRepository implements TeamRepository {
       data: { ...data, metadata: JSON.parse(JSON.stringify(data.metadata)) },
     });
 
-    return Team.create({ ...stored });
+    return Team.fromPrimitives({
+      ...stored,
+      metadata: stored.metadata ?? {},
+      createdAt: stored.createdAt,
+      updatedAt: stored.updatedAt,
+    });
   }
 
   async list(): Promise<Team[]> {
     const list = await this.prisma.team.findMany();
-    return list.map((t) => Team.create({ ...t }));
+    return list.map((t) => Team.fromPrimitives({ ...t }));
   }
 
   async findById(id: UUID): Promise<Team | undefined> {
     const team = await this.prisma.team.findUnique({ where: { id } });
-    return team ? Team.create({ ...team }) : undefined;
+    return team ? Team.fromPrimitives({ ...team }) : undefined;
   }
 }

@@ -77,6 +77,8 @@ export class Match implements Identified {
   get participants(): [MatchParticipant, MatchParticipant] { return this.props.participants; }
   get completedAt() { return this.props.completedAt; }
   get metadata() { return this.props.metadata; }
+  get createdAt() { return this.props.createdAt; }
+  get updatedAt() { return this.props.updatedAt; }
 
   markCompleted(timestamp: string) {
     if (this.props.completedAt) {

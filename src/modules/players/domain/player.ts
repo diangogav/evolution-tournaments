@@ -1,6 +1,6 @@
 import type { Identified } from "../../shared/types";
 
-export interface PlayerProps {
+export interface PlayerProps extends Identified {
   id: string;
   displayName: string;
   nickname?: string | null;
@@ -11,10 +11,13 @@ export interface PlayerProps {
   isActive: boolean;
   metadata: unknown;
 }
-export class Player implements Identified {
-  private constructor(private props: PlayerProps) {}
 
-  static create(props: PlayerProps): Player {
+export type CreatePlayerProps = Omit<PlayerProps, "createdAt" | "updatedAt">;
+
+export class Player implements Identified {
+  private constructor(private props: PlayerProps) { }
+
+  static create(props: CreatePlayerProps): Player {
     if (!props.displayName || props.displayName.trim().length === 0) {
       throw new Error("Player.displayName cannot be empty");
     }
@@ -24,7 +27,13 @@ export class Player implements Identified {
       preferredDisciplines: props.preferredDisciplines ?? [],
       metadata: props.metadata ?? {},
       isActive: props.isActive ?? true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
+  }
+
+  static fromPrimitives(props: PlayerProps): Player {
+    return new Player(props);
   }
 
   get id() {
@@ -35,9 +44,10 @@ export class Player implements Identified {
     return this.props.displayName;
   }
 
-  get isActive() {
-    return this.props.isActive;
-  }
+  get isActive() { return this.props.isActive; }
+  get metadata() { return this.props.metadata; }
+  get createdAt() { return this.props.createdAt; }
+  get updatedAt() { return this.props.updatedAt; }
 
   deactivate() {
     this.props.isActive = false;

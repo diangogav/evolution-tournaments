@@ -25,7 +25,7 @@ model Player {
   isActive             Boolean  @default(true)
   metadata             Json?
   createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  updatedAt            DateTime @updatedAt @default(now())
 
   teamMembers TeamMember[]
   participant Participant?
@@ -45,7 +45,7 @@ model Team {
   isActive    Boolean  @default(true)
   metadata    Json?
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  updatedAt   DateTime @updatedAt @default(now())
 
   teamMembers TeamMember[]
   participant Participant?
@@ -62,7 +62,7 @@ model TeamMember {
   joinedAt  String
   leftAt    String?
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @updatedAt @default(now())
 
   team   Team   @relation(fields: [teamId], references: [id])
   player Player @relation(fields: [playerId], references: [id])
@@ -87,7 +87,7 @@ model Participant {
   seeding     Int?
   metadata    Json?
   createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  updatedAt   DateTime        @updatedAt @default(now())
 
   player  Player?           @relation(fields: [playerId], references: [id])
   team    Team?             @relation(fields: [teamId], references: [id])
@@ -118,7 +118,7 @@ model Tournament {
   webhookUrl             String?
   metadata               Json?
   createdAt              DateTime         @default(now())
-  updatedAt              DateTime         @updatedAt
+  updatedAt              DateTime         @updatedAt @default(now())
 
   entries TournamentEntry[]
   groups  Group[]
@@ -142,7 +142,7 @@ model TournamentEntry {
   seed          Int?
   metadata      Json?
   createdAt     DateTime              @default(now())
-  updatedAt     DateTime              @updatedAt
+  updatedAt     DateTime              @updatedAt @default(now())
 
   tournament  Tournament  @relation(fields: [tournamentId], references: [id])
   participant Participant @relation(fields: [participantId], references: [id])
@@ -164,7 +164,7 @@ model Group {
   name         String
   metadata     Json?
   createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  updatedAt    DateTime @updatedAt @default(now())
 
   tournament   Tournament        @relation(fields: [tournamentId], references: [id])
   participants TournamentEntry[]
@@ -190,7 +190,7 @@ model Match {
   participants Json              // [{ participantId, score, ... }]
   metadata     Json?
   createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
+  updatedAt    DateTime          @updatedAt @default(now())
 
   tournament Tournament @relation(fields: [tournamentId], references: [id])
 

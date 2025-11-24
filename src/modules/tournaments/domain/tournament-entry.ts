@@ -13,10 +13,12 @@ export interface TournamentEntryProps extends Identified {
   metadata: unknown;
 }
 
+export type CreateTournamentEntryProps = Omit<TournamentEntryProps, 'createdAt' | 'updatedAt'>;
+
 export class TournamentEntry implements Identified {
   private constructor(private props: TournamentEntryProps) { }
 
-  static create(props: TournamentEntryProps): TournamentEntry {
+  static create(props: CreateTournamentEntryProps): TournamentEntry {
     if (props.seed !== undefined && props.seed !== null && props.seed <= 0) {
       throw new Error("TournamentEntry.seed must be > 0");
     }
@@ -24,7 +26,13 @@ export class TournamentEntry implements Identified {
     return new TournamentEntry({
       ...props,
       metadata: props.metadata ?? {},
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
+  }
+
+  static fromPrimitives(props: TournamentEntryProps): TournamentEntry {
+    return new TournamentEntry(props);
   }
 
   get id() { return this.props.id; }
@@ -32,6 +40,8 @@ export class TournamentEntry implements Identified {
   get participantId() { return this.props.participantId; }
   get seed() { return this.props.seed ?? null; }
   get status() { return this.props.status; }
+  get createdAt() { return this.props.createdAt; }
+  get updatedAt() { return this.props.updatedAt; }
 
   toPrimitives() {
     return { ...this.props };

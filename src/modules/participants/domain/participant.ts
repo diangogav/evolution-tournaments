@@ -9,10 +9,12 @@ export interface ParticipantProps extends Identified {
   metadata: unknown;
 }
 
+export type CreateParticipantProps = Omit<ParticipantProps, "createdAt" | "updatedAt">;
+
 export class Participant implements Identified {
   private constructor(private props: ParticipantProps) { }
 
-  static create(props: ParticipantProps): Participant {
+  static create(props: CreateParticipantProps): Participant {
     if (!props.displayName || props.displayName.trim().length === 0) {
       throw new Error("Participant.displayName cannot be empty");
     }
@@ -26,7 +28,13 @@ export class Participant implements Identified {
     return new Participant({
       ...props,
       metadata: props.metadata ?? {},
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
+  }
+
+  static fromPrimitives(props: ParticipantProps): Participant {
+    return new Participant(props);
   }
 
   get id() { return this.props.id; }
@@ -34,6 +42,8 @@ export class Participant implements Identified {
   get referenceId() { return this.props.referenceId; }
   get displayName() { return this.props.displayName; }
   get metadata() { return this.props.metadata; }
+  get createdAt() { return this.props.createdAt; }
+  get updatedAt() { return this.props.updatedAt; }
 
   toPrimitives() { return { ...this.props }; }
 }

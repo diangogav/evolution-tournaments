@@ -4,7 +4,7 @@ import type { TeamMemberRepository } from "../../../domain/team-member.repositor
 
 
 export class PrismaTeamMemberRepository implements TeamMemberRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaClient) { }
 
   async create(member: TeamMember): Promise<TeamMember> {
     const data = member.toPrimitives();
@@ -13,11 +13,11 @@ export class PrismaTeamMemberRepository implements TeamMemberRepository {
       data,
     });
 
-    return TeamMember.create(stored);
+    return TeamMember.fromPrimitives(stored);
   }
 
   async listByTeam(teamId: string): Promise<TeamMember[]> {
     const list = await this.prisma.teamMember.findMany({ where: { teamId } });
-    return list.map((m) => TeamMember.create(m));
+    return list.map((m) => TeamMember.fromPrimitives(m));
   }
 }

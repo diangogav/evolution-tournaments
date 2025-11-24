@@ -21,10 +21,12 @@ export interface TournamentProps extends Identified {
   metadata: unknown;
 }
 
+export type CreateTournamentProps = Omit<TournamentProps, "createdAt" | "updatedAt">;
+
 export class Tournament implements Identified {
   private constructor(private props: TournamentProps) { }
 
-  static create(props: TournamentProps): Tournament {
+  static create(props: CreateTournamentProps): Tournament {
     if (!props.name || props.name.trim().length === 0) {
       throw new Error("Tournament.name cannot be empty");
     }
@@ -46,7 +48,13 @@ export class Tournament implements Identified {
       ...props,
       webhookUrl: props.webhookUrl ?? null,
       metadata: props.metadata ?? {},
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
+  }
+
+  static fromPrimitives(props: TournamentProps): Tournament {
+    return new Tournament(props);
   }
 
   get id() { return this.props.id; }
@@ -56,6 +64,8 @@ export class Tournament implements Identified {
   get participantType() { return this.props.participantType; }
   get maxParticipants() { return this.props.maxParticipants ?? null; }
   get webhookUrl() { return this.props.webhookUrl; }
+  get createdAt() { return this.props.createdAt; }
+  get updatedAt() { return this.props.updatedAt; }
 
   // State transition methods
   publish(): void {

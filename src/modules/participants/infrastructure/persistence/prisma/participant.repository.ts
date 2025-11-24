@@ -4,7 +4,7 @@ import type { UUID } from "../../../../shared/types";
 import { PrismaClient } from "@prisma/client";
 
 export class PrismaParticipantRepository implements ParticipantRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaClient) { }
 
   async create(participant: Participant): Promise<Participant> {
     const data = participant.toPrimitives();
@@ -22,7 +22,7 @@ export class PrismaParticipantRepository implements ParticipantRepository {
       },
     });
 
-    return Participant.create({
+    return Participant.fromPrimitives({
       id: stored.id,
       type: stored.type,
       displayName: stored.displayName,
@@ -30,6 +30,8 @@ export class PrismaParticipantRepository implements ParticipantRepository {
       seeding: stored.seeding,
       referenceId: stored.playerId ?? stored.teamId!,
       metadata: stored.metadata ?? {},
+      createdAt: stored.createdAt,
+      updatedAt: stored.updatedAt,
     });
   }
 
@@ -37,7 +39,7 @@ export class PrismaParticipantRepository implements ParticipantRepository {
     const list = await this.prisma.participant.findMany();
 
     return list.map((stored) =>
-      Participant.create({
+      Participant.fromPrimitives({
         id: stored.id,
         type: stored.type,
         displayName: stored.displayName,
@@ -45,6 +47,8 @@ export class PrismaParticipantRepository implements ParticipantRepository {
         seeding: stored.seeding,
         referenceId: stored.playerId ?? stored.teamId!,
         metadata: stored.metadata ?? {},
+        createdAt: stored.createdAt,
+        updatedAt: stored.updatedAt,
       })
     );
   }
@@ -53,7 +57,7 @@ export class PrismaParticipantRepository implements ParticipantRepository {
     const stored = await this.prisma.participant.findUnique({ where: { id } });
     if (!stored) return null;
 
-    return Participant.create({
+    return Participant.fromPrimitives({
       id: stored.id,
       type: stored.type,
       displayName: stored.displayName,
@@ -61,6 +65,8 @@ export class PrismaParticipantRepository implements ParticipantRepository {
       seeding: stored.seeding,
       referenceId: stored.playerId ?? stored.teamId!,
       metadata: stored.metadata ?? {},
+      createdAt: stored.createdAt,
+      updatedAt: stored.updatedAt,
     });
   }
 }

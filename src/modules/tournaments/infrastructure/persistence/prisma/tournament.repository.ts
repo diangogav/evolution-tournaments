@@ -29,7 +29,7 @@ export class PrismaTournamentRepository implements TournamentRepository {
       },
     });
 
-    return Tournament.create({
+    return Tournament.fromPrimitives({
       id: stored.id,
       name: stored.name,
       description: stored.description,
@@ -44,14 +44,20 @@ export class PrismaTournamentRepository implements TournamentRepository {
       location: stored.location,
       webhookUrl: stored.webhookUrl,
       metadata: stored.metadata ?? {},
+      createdAt: stored.createdAt,
+      updatedAt: stored.updatedAt,
     });
   }
 
   async list(): Promise<Tournament[]> {
-    const list = await this.prisma.tournament.findMany();
-
+    const list = await this.prisma.tournament.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+    console.log(list);
     return list.map((stored) =>
-      Tournament.create({
+      Tournament.fromPrimitives({
         id: stored.id,
         name: stored.name,
         description: stored.description,
@@ -66,6 +72,8 @@ export class PrismaTournamentRepository implements TournamentRepository {
         location: stored.location,
         webhookUrl: stored.webhookUrl,
         metadata: stored.metadata ?? {},
+        createdAt: stored.createdAt,
+        updatedAt: stored.updatedAt,
       })
     );
   }
@@ -74,7 +82,7 @@ export class PrismaTournamentRepository implements TournamentRepository {
     const stored = await this.prisma.tournament.findUnique({ where: { id } });
     if (!stored) return undefined;
 
-    return Tournament.create({
+    return Tournament.fromPrimitives({
       id: stored.id,
       name: stored.name,
       description: stored.description,
@@ -89,6 +97,8 @@ export class PrismaTournamentRepository implements TournamentRepository {
       location: stored.location,
       webhookUrl: stored.webhookUrl,
       metadata: stored.metadata ?? {},
+      createdAt: stored.createdAt,
+      updatedAt: stored.updatedAt,
     });
   }
 
@@ -114,7 +124,7 @@ export class PrismaTournamentRepository implements TournamentRepository {
       },
     });
 
-    return Tournament.create({
+    return Tournament.fromPrimitives({
       id: stored.id,
       name: stored.name,
       description: stored.description,
@@ -129,6 +139,8 @@ export class PrismaTournamentRepository implements TournamentRepository {
       location: stored.location,
       webhookUrl: stored.webhookUrl,
       metadata: stored.metadata ?? {},
+      createdAt: stored.createdAt,
+      updatedAt: stored.updatedAt,
     });
   }
 }

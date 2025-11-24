@@ -21,7 +21,7 @@ export class PrismaTournamentEntryRepository implements TournamentEntryRepositor
       },
     });
 
-    return TournamentEntry.create({
+    return TournamentEntry.fromPrimitives({
       id: stored.id,
       tournamentId: stored.tournamentId,
       participantId: stored.participantId,
@@ -29,6 +29,8 @@ export class PrismaTournamentEntryRepository implements TournamentEntryRepositor
       groupId: stored.groupId,
       seed: stored.seed,
       metadata: stored.metadata ?? {},
+      createdAt: stored.createdAt,
+      updatedAt: stored.updatedAt,
     });
   }
 
@@ -38,7 +40,7 @@ export class PrismaTournamentEntryRepository implements TournamentEntryRepositor
     });
 
     return list.map((stored) =>
-      TournamentEntry.create({
+      TournamentEntry.fromPrimitives({
         id: stored.id,
         tournamentId: stored.tournamentId,
         participantId: stored.participantId,
@@ -46,6 +48,8 @@ export class PrismaTournamentEntryRepository implements TournamentEntryRepositor
         groupId: stored.groupId,
         seed: stored.seed,
         metadata: stored.metadata ?? {},
+        createdAt: stored.createdAt,
+        updatedAt: stored.updatedAt,
       })
     );
   }
@@ -70,7 +74,7 @@ export class PrismaTournamentEntryRepository implements TournamentEntryRepositor
 
     if (!stored) return null;
 
-    return TournamentEntry.create({
+    return TournamentEntry.fromPrimitives({
       id: stored.id,
       tournamentId: stored.tournamentId,
       participantId: stored.participantId,
@@ -78,6 +82,8 @@ export class PrismaTournamentEntryRepository implements TournamentEntryRepositor
       groupId: stored.groupId,
       seed: stored.seed,
       metadata: stored.metadata ?? {},
+      createdAt: stored.createdAt,
+      updatedAt: stored.updatedAt,
     });
   }
 
@@ -88,7 +94,7 @@ export class PrismaTournamentEntryRepository implements TournamentEntryRepositor
 
     if (!stored) return null;
 
-    return TournamentEntry.create({
+    return TournamentEntry.fromPrimitives({
       id: stored.id,
       tournamentId: stored.tournamentId,
       participantId: stored.participantId,
@@ -96,6 +102,8 @@ export class PrismaTournamentEntryRepository implements TournamentEntryRepositor
       groupId: stored.groupId,
       seed: stored.seed,
       metadata: stored.metadata ?? {},
+      createdAt: stored.createdAt,
+      updatedAt: stored.updatedAt,
     });
   }
 }
