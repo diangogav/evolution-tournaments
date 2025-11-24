@@ -3,6 +3,8 @@
   "version": "1.0.50",
   "scripts": {
     "test:e2e": "vitest --config vitest.node.config.ts",
+    "test:e2e:ui": "vitest --config vitest.node.config.ts --ui",
+    "test:e2e:coverage": "vitest --config vitest.node.config.ts --coverage",
     "dev": "bun run src/index.ts",
     "migrate:deploy": "npx prisma migrate deploy",
     "prisma:generate": "bunx prisma@6.19.0 generate",
@@ -25,6 +27,7 @@
     "@testcontainers/postgresql": "^11.8.1",
     "@types/supertest": "^6.0.3",
     "@vitest/coverage-c8": "^0.33.0",
+    "@vitest/coverage-v8": "4.0.10",
     "@vitest/ui": "^4.0.10",
     "bun-types": "latest",
     "supertest": "^7.1.4",
