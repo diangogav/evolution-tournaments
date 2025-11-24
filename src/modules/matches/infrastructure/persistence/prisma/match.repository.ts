@@ -30,7 +30,7 @@ export class PrismaMatchRepository implements MatchRepository {
       },
     ];
 
-    return MatchEntity.create({
+    return MatchEntity.fromPrimitives({
       id: row.id,
       tournamentId: row.tournamentId,
       roundNumber: row.roundNumber,

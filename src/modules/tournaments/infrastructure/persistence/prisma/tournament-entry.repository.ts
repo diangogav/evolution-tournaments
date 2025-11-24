@@ -37,6 +37,7 @@ export class PrismaTournamentEntryRepository implements TournamentEntryRepositor
   async listByTournament(tournamentId: UUID): Promise<TournamentEntry[]> {
     const list = await this.prisma.tournamentEntry.findMany({
       where: { tournamentId },
+      include: { participant: true },
     });
 
     return list.map((stored) =>
@@ -50,6 +51,7 @@ export class PrismaTournamentEntryRepository implements TournamentEntryRepositor
         metadata: stored.metadata ?? {},
         createdAt: stored.createdAt,
         updatedAt: stored.updatedAt,
+        participantName: stored.participant.displayName,
       })
     );
   }

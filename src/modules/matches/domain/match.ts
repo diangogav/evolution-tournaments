@@ -17,10 +17,12 @@ export interface MatchProps extends Identified {
   metadata: Record<string, unknown>;
 }
 
+export type CreateMatchProps = Omit<MatchProps, "createdAt" | "updatedAt">;
+
 export class Match implements Identified {
   private constructor(private props: MatchProps) { }
 
-  static create(props: MatchProps): Match {
+  static create(props: CreateMatchProps): Match {
     if (!props.tournamentId) {
       throw new Error("Match.tournamentId is required");
     }
@@ -65,9 +67,15 @@ export class Match implements Identified {
           lineup: p2.lineup,
         },
       ],
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
 
     return new Match(normalized);
+  }
+
+  static fromPrimitives(props: MatchProps): Match {
+    return new Match(props);
   }
 
   get id() { return this.props.id; }

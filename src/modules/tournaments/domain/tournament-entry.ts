@@ -11,6 +11,7 @@ export interface TournamentEntryProps extends Identified {
   groupId?: UUID | null;
   seed?: number | null;
   metadata: unknown;
+  participantName?: string;
 }
 
 export type CreateTournamentEntryProps = Omit<TournamentEntryProps, 'createdAt' | 'updatedAt'>;
@@ -42,6 +43,7 @@ export class TournamentEntry implements Identified {
   get status() { return this.props.status; }
   get createdAt() { return this.props.createdAt; }
   get updatedAt() { return this.props.updatedAt; }
+  get participantName() { return this.props.participantName; }
 
   toPrimitives() {
     return { ...this.props };

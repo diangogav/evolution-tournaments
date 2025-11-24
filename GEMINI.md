@@ -1,6 +1,6 @@
 # Project Overview
 
-This project is a tournament management system built with a modular architecture. It uses Elysia.js as the web framework and Bun as the runtime. The database can be either PostgreSQL (with Prisma as the ORM) or an in-memory database, which is configurable via the `USE_PRISMA` environment variable.
+This project is a tournament management system built with a modular architecture. It uses Elysia.js as the web framework and Bun as the runtime. The database can be either PostgreSQL (with Prisma as the ORM).
 
 The project is structured into the following modules:
 - `players`: Manages individual players.
@@ -40,9 +40,8 @@ The application can be configured to use either a PostgreSQL database or an in-m
    docker-compose up -d
    ```
 
-2. Set the `USE_PRISMA` environment variable to `true`. You can do this by creating a `.env` file with the following content:
+2. Set the `DATABASE_URL` environment variable to the URL of your PostgreSQL instance. You can do this by creating a `.env` file with the following content:
    ```
-   USE_PRISMA=true
    DATABASE_URL="postgresql://user:password@localhost:5432/tournaments"
    ```
 
@@ -55,16 +54,6 @@ The application can be configured to use either a PostgreSQL database or an in-m
    ```bash
    bun run db:seed
    ```
-
-### Using the in-memory database
-By default, the application uses an in-memory database. To use it, make sure the `USE_PRISMA` environment variable is not set to `true`.
-
-# Testing
-
-To run the tests, use the following command:
-```bash
-bun test
-```
 
 # Development Conventions
 

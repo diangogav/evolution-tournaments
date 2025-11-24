@@ -7,8 +7,8 @@ export const entriesRoutes = (deps: HttpDependencies) =>
         app
             .get(
                 "/",
-                ({ params }) =>
-                    deps.repositories.entries.listByTournament(params.tournamentId),
+                async ({ params }) =>
+                    (await (deps.repositories.entries.listByTournament(params.tournamentId))).map(e => e.toPrimitives()),
                 {
                     params: t.Object({ tournamentId: IdentifierSchema }),
                     detail: {

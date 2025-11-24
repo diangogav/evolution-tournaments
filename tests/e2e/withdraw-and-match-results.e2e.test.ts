@@ -75,7 +75,7 @@ describe("Withdraw and Match Results E2E", () => {
         const p2 = await prisma.participant.create({ data: { displayName: "P2", type: "PLAYER" } });
 
         const match = await matchRepo.create(
-            Match.create({
+            Match.fromPrimitives({
                 id: "match-1",
                 tournamentId: tournament.id,
                 roundNumber: 1,
@@ -89,6 +89,8 @@ describe("Withdraw and Match Results E2E", () => {
                 ],
                 completedAt: new Date().toISOString(),
                 metadata: {},
+                createdAt: new Date(),
+                updatedAt: new Date(),
             })
         );
 

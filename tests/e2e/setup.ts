@@ -26,7 +26,6 @@ beforeAll(async () => {
     console.log("🟢 DB Ready:", dbUrl);
 
     process.env.DATABASE_URL = dbUrl;
-    process.env.USE_PRISMA = "true";
 
     console.log("🔄 Running migrations…");
     await asyncExec(`bunx prisma@6.19.0 migrate deploy`, {
