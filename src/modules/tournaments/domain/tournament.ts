@@ -106,4 +106,9 @@ export class Tournament implements Identified {
   toPrimitives() {
     return { ...this.props };
   }
+
+  toPresentation() {
+    const { webhookUrl, ...data } = this.props
+    return data
+  }
 }

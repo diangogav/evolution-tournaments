@@ -6,7 +6,7 @@ export const tournamentsRoutes = (deps: HttpDependencies) =>
     new Elysia()
         .group("/tournaments", (app) =>
             app
-                .get("/", () => deps.repositories.tournaments.list(), {
+                .get("/", async () => (await deps.repositories.tournaments.list()).map((tournament) => tournament.toPresentation()), {
                     detail: {
                         tags: ['Tournaments'],
                         summary: 'Listar torneos',
@@ -18,7 +18,7 @@ export const tournamentsRoutes = (deps: HttpDependencies) =>
                     async ({ params }) =>
                         (
                             await deps.repositories.tournaments.findById(params.tournamentId)
-                        )?.toPrimitives(),
+                        )?.toPresentation(),
                     {
                         params: t.Object({ tournamentId: IdentifierSchema }),
                         detail: {
